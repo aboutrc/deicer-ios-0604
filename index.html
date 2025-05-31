@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="/deicerlogo.png" as="image" />
+    
+    <!-- Inline critical CSS -->
+    <style>
+      /* Critical CSS for initial render */
+      body, html {
+        margin: 0;
+        padding: 0;
+        background-color: rgb(17 24 39);
+        color: #e5e7eb;
+        height: 100%;
+        width: 100%;
+      }
+      
+      #root {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .min-h-screen {
+        min-height: 100vh;
+      }
+      .flex {
+        display: flex;
+      }
+      .flex-col {
+        flex-direction: column;
+      }
+      .fixed {
+        position: fixed;
+      }
+      .bg-black {
+        background-color: #000;
+      }
+      .bg-gray-900 {
+        background-color: rgb(17 24 39);
+      }
+      .text-white {
+        color: #fff;
+      }
+      .z-50 {
+        z-index: 50;
+      }
+      .border-b {
+        border-bottom-width: 1px;
+      }
+      .border-gray-800 {
+        border-color: rgb(31 41 55);
+      }
+      
+      /* iOS Safari fix */
+      @supports (-webkit-touch-callout: none) {
+        body, html {
+          height: 100%;
+          min-height: 100%;
+          background-color: rgb(17 24 39);
+        }
+        
+        #root {
+          height: 100%;
+          overflow: hidden;
+        }
+      }
+    </style>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Gothic+Expanded+One&family=Staatliches&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Special+Gothic+Expanded+One&family=Staatliches&display=swap" rel="stylesheet">
+    </noscript>
+    
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="DEICER : DEI Community Engagement Reporter" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="DEICER : DEI Community Engagement Reporter" />
+    <link rel="apple-touch-icon" href="/icon-192x192.png" />
+    <link rel="mask-icon" href="/logo.svg" color="#000000" />
+    <meta name="msapplication-TileColor" content="#000000" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta http-equiv="Cache-Control" content="no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Clear-Site-Data" content="cache, storage, executionContexts" />
+    <title>DEICER : DEI Community Engagement Reporter</title>
+    <style>
+      /* Fix for iOS scrolling */
+      main {
+        -webkit-overflow-scrolling: touch;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex flex-col overflow-hidden">
+    <div id="root"></div>
+    <div id="overlay-root"></div>
+    <script type="module" src="/src/main.tsx" defer></script>
+  </body>
+</html>
