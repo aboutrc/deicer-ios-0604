@@ -14,7 +14,7 @@ const Footer = ({ language = 'en', className = '' }: FooterProps) => {
   return (
     <footer className={`backdrop-blur-sm border-t border-gray-800 h-16 ${className} ${language === 'ar' ? 'rtl' : 'ltr'}`}>
       <div className="container mx-auto px-4 h-full flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex-1 overflow-hidden whitespace-nowrap min-w-0">
+        <div className="flex-1 overflow-hidden whitespace-nowrap min-w-0 flex items-center">
           <div className="animate-scroll inline-block">
             <p className="text-gray-300 text-sm">
               <span dangerouslySetInnerHTML={{ __html: t.footer?.message || translations.en.footer.message }} />
@@ -27,6 +27,19 @@ const Footer = ({ language = 'en', className = '' }: FooterProps) => {
             </p>
           </div>
         </div>
+        <a 
+          href="/donate" 
+          className="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg flex items-center gap-1.5 transition-colors"
+        >
+          <Coffee size={16} />
+          <span className="font-medium text-sm">
+            {language === 'es' ? 'Donar' : 
+             language === 'zh' ? '捐赠' : 
+             language === 'hi' ? 'दान करें' : 
+             language === 'ar' ? 'تبرع' : 
+             'Donate'}
+          </span>
+        </a>
       </div>
     </footer>
   );

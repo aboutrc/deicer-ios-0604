@@ -19,6 +19,26 @@ export const translations = {
         benefit3: 'التوسع إلى المزيد من اللغات والمناطق',
         benefit4: 'الحفاظ على خوادمنا وبنيتنا التحتية'
       },
+    },
+    protect: {
+      title: 'حماية',
+      donate: {
+        title: 'دعم DEICER',
+        subtitle: 'تبرعك يساعدنا على الاستمرار في تقديم هذه الخدمة مجانًا',
+        donateButton: 'تبرع',
+        donateNow: 'تبرع الآن',
+        loading: 'جاري المعالجة...',
+        error: 'حدث خطأ. يرجى المحاولة مرة أخرى.',
+        loginRequired: 'يرجى تسجيل الدخول للتبرع',
+        loginButton: 'تسجيل الدخول',
+        signupButton: 'إنشاء حساب',
+        thankYou: 'شكرًا لدعمك!',
+        benefits: 'تبرعك يساعدنا في:',
+        benefit1: 'الحفاظ على الخدمة مجانية للجميع',
+        benefit2: 'تحسين وإضافة ميزات جديدة',
+        benefit3: 'التوسع إلى المزيد من اللغات والمناطق',
+        benefit4: 'الحفاظ على خوادمنا وبنيتنا التحتية'
+      },
       realTimeTranslation: 'الترجمة في الوقت الحقيقي',
       startListening: 'ابدأ الاستماع',
       stopListening: 'توقف عن الاستماع',
@@ -207,6 +227,26 @@ export const translations = {
   en: {
     protect: {
       title: 'Protect',
+      donate: {
+        title: 'Support DEICER',
+        subtitle: 'Your donation helps us continue to provide this service for free',
+        donateButton: 'Donate',
+        donateNow: 'Donate Now',
+        loading: 'Processing...',
+        error: 'An error occurred. Please try again.',
+        loginRequired: 'Please log in to donate',
+        loginButton: 'Log In',
+        signupButton: 'Sign Up',
+        thankYou: 'Thank you for your support!',
+        benefits: 'Your donation helps us:',
+        benefit1: 'Keep the service free for everyone',
+        benefit2: 'Improve and add new features',
+        benefit3: 'Expand to more languages and regions',
+        benefit4: 'Maintain our servers and infrastructure'
+      },
+    },
+    protect: {
+      title: 'Protect',
       realTimeTranslation: 'Real-time Translation',
       startListening: 'Start Listening',
       stopListening: 'Stop Listening',
@@ -391,6 +431,26 @@ export const translations = {
     }
   },
   hi: {
+    protect: {
+      title: 'सुरक्षा',
+      donate: {
+        title: 'DEICER का समर्थन करें',
+        subtitle: 'आपका दान हमें यह सेवा मुफ्त में प्रदान करने में मदद करता है',
+        donateButton: 'दान करें',
+        donateNow: 'अभी दान करें',
+        loading: 'प्रोसेसिंग...',
+        error: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।',
+        loginRequired: 'दान करने के लिए कृपया लॉग इन करें',
+        loginButton: 'लॉग इन',
+        signupButton: 'साइन अप',
+        thankYou: 'आपके समर्थन के लिए धन्यवाद!',
+        benefits: 'आपका दान हमें मदद करता है:',
+        benefit1: 'सेवा को सभी के लिए मुफ्त रखने में',
+        benefit2: 'सुधार करने और नई सुविधाएँ जोड़ने में',
+        benefit3: 'अधिक भाषाओं और क्षेत्रों में विस्तार करने में',
+        benefit4: 'हमारे सर्वर और बुनियादी ढांचे को बनाए रखने में'
+      },
+    },
     protect: {
       title: 'सुरक्षा',
       donate: {
