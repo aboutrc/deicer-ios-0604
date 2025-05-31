@@ -1,75 +1,94 @@
 import { useEffect, useState, useRef } from 'react';
-import { View, StyleSheet, Text, Platform, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, StyleSheet, Text, Platform, TouchableOpacity, Image, Alert, Modal } from 'react-native';
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MapPin, CircleAlert as AlertCircle, Loader as Loader2, Camera, Eye, Shield, Search, School, Plus, RotateCw } from 'lucide-react-native';
+import { MapPin, CircleAlert as AlertCircle, Loader as Loader2, Camera, Eye, Shield, Search, Plus, RotateCw, Clock, X } from 'lucide-react-native';
 import { useLanguage } from '@/context/LanguageContext';
+import { useMarkers } from '@/context/MarkerContext';
 
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [isAddingPin, setIsAddingPin] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showPinTypeModal, setShowPinTypeModal] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{latitude: number, longitude: number} | null>(null);
+  const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
   const mapRef = useRef<any>(null);
   const router = useRouter();
   const { t, isInitialized } = useLanguage();
   const params = useLocalSearchParams();
+  const { markers, isAddingMarker, setIsAddingMarker, addMarker, loading: markersLoading, refreshMarkers } = useMarkers();
+
+  // Refresh markers on initial load
+  useEffect(() => {
+    refreshMarkers();
+  }, []);
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await refreshMarkers();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     if (params.action === 'addMark') {
-      setIsAddingPin(true);
+      setIsAddingMarker(true);
     }
   }, [params.action]);
 
   const handleMapPress = (event: any) => {
-    if (!isAddingPin) return;
+    if (!isAddingMarker) return;
     
-    setSelectedLocation(event.coordinates);
+    setSelectedLocation({
+      latitude: event.nativeEvent.coordinate.latitude,
+      longitude: event.nativeEvent.coordinate.longitude
+    });
     setShowPinTypeModal(true);
-    setIsAddingPin(false);
+    setIsAddingMarker(false);
   };
 
   const handleSelectImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-      allowsEditing: true,
-    });
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        allowsEditing: true,
+      });
 
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
+      if (!result.canceled) {
+        setSelectedImage(result.assets[0].uri);
+      }
+    } catch (err) {
+      console.error('Error selecting image:', err);
+      Alert.alert('Error', 'Failed to select image');
     }
   };
 
-  const handlePinType = async (type: 'ice' | 'observer') => {
+  const handleAddMarker = async (category: 'ice' | 'observer') => {
     if (!selectedLocation) return;
 
-    // Here you would normally send this to your backend
-    const pin = {
-      type,
-      location: selectedLocation,
-      image: selectedImage,
-      timestamp: new Date().toISOString()
-    };
+    try {
+      await addMarker({
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
+        category,
+        imageUri: selectedImage
+      });
 
-    console.log('New pin:', pin);
-    
-    // Show success message
-    Alert.alert(
-      'Success',
-      `${type.toUpperCase()} marker added successfully`,
-      [{ text: 'OK' }]
-    );
-
-    // Reset state
-    setSelectedImage(null);
-    setShowPinTypeModal(false);
-    setSelectedLocation(null);
+      setSelectedImage(null);
+      setShowPinTypeModal(false);
+      setSelectedLocation(null);
+    } catch (err) {
+      console.error('Error adding marker:', err);
+      Alert.alert('Error', 'Failed to add marker');
+    }
   };
 
   useEffect(() => {
@@ -101,6 +120,73 @@ export default function MapScreen() {
     router.push('/report');
   };
 
+  const renderMarkerPopup = () => {
+    if (!selectedMarker) return null;
+
+    return (
+      <Modal
+        visible={!!selectedMarker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedMarker(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.markerPopup}>
+            <View style={styles.markerPopupHeader}>
+              <View style={[
+                styles.categoryBadge,
+                selectedMarker.category === 'ice' ? styles.iceBadge : styles.observerBadge
+              ]}>
+                <Text style={styles.categoryText}>
+                  {selectedMarker.category.toUpperCase()}
+                </Text>
+              </View>
+              <TouchableOpacity 
+                onPress={() => setSelectedMarker(null)}
+                style={styles.closeButton}
+              >
+                <X size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+
+            {selectedMarker.image_url && (
+              <Image 
+                source={{ uri: selectedMarker.image_url }}
+                style={styles.markerImage}
+                resizeMode="cover"
+              />
+            )}
+
+            <View style={styles.markerInfo}>
+              <Text style={styles.markerTitle}>{selectedMarker.title}</Text>
+              <Text style={styles.markerDescription}>{selectedMarker.description}</Text>
+              
+              <View style={styles.markerMetadata}>
+                <Clock size={16} color="#8E8E93" />
+                <Text style={styles.metadataText}>
+                  {new Date(selectedMarker.created_at).toLocaleString()}
+                </Text>
+              </View>
+
+              <View style={styles.markerStats}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>Confirmations</Text>
+                  <Text style={styles.statValue}>{selectedMarker.confirmations_count}</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>Reliability</Text>
+                  <Text style={styles.statValue}>
+                    {Math.round(selectedMarker.reliability_score * 100)}%
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
   const renderMap = () => {
     if (Platform.OS === 'web') {
       return (
@@ -125,16 +211,7 @@ export default function MapScreen() {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         } : undefined}
-        onPress={(e) => {
-          if (isAddingPin) {
-            setSelectedLocation({
-              latitude: e.nativeEvent.coordinate.latitude,
-              longitude: e.nativeEvent.coordinate.longitude
-            });
-            setShowPinTypeModal(true);
-            setIsAddingPin(false);
-          }
-        }}
+        onPress={handleMapPress}
       >
         {selectedLocation && (
           <Marker
@@ -142,10 +219,27 @@ export default function MapScreen() {
               latitude: selectedLocation.latitude,
               longitude: selectedLocation.longitude
             }}
+            pinColor="#FF3B30"
           >
             <MapPin size={28} color="#007AFF" />
           </Marker>
         )}
+        
+        {markers.map((marker) => (
+          <Marker
+            key={marker.id}
+            coordinate={{
+              latitude: marker.latitude,
+              longitude: marker.longitude
+            }}
+            onPress={() => setSelectedMarker(marker)}
+          >
+            <MapPin 
+              size={28} 
+              color={marker.category === 'ice' ? '#FF3B30' : '#007AFF'} 
+            />
+          </Marker>
+        ))}
       </MapView>
     );
   };
@@ -153,10 +247,24 @@ export default function MapScreen() {
   const renderPinTypeModal = () => {
     if (!showPinTypeModal) return null;
 
+    const handleCancel = () => {
+      setShowPinTypeModal(false);
+      setSelectedLocation(null);
+      setSelectedImage(null);
+    };
+
     return (
       <View style={styles.modalOverlay}>
         <View style={styles.modal}>
-          <Text style={styles.modalTitle}>Add New Pin</Text>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Add New Pin</Text>
+            <TouchableOpacity 
+              style={styles.cancelButton}
+              onPress={handleCancel}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
           
           <TouchableOpacity style={styles.imageButton} onPress={handleSelectImage}>
             <Camera size={24} color="#007AFF" />
@@ -172,7 +280,7 @@ export default function MapScreen() {
           <View style={styles.pinTypeContainer}>
             <TouchableOpacity 
               style={[styles.pinTypeButton, styles.iceButton]}
-              onPress={() => handlePinType('ice')}
+              onPress={() => handleAddMarker('ice')}
             >
               <Shield size={24} color="#FFF" />
               <Text style={styles.pinTypeText}>ICE</Text>
@@ -180,7 +288,7 @@ export default function MapScreen() {
 
             <TouchableOpacity 
               style={[styles.pinTypeButton, styles.observerButton]}
-              onPress={() => handlePinType('observer')}
+              onPress={() => handleAddMarker('observer')}
             >
               <Eye size={24} color="#FFF" />
               <Text style={styles.pinTypeText}>Observer</Text>
@@ -225,24 +333,29 @@ export default function MapScreen() {
               <Search size={24} color="#FFFFFF" />
               <Text style={styles.mapControlText}>Search</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.mapControlButton}>
-              <School size={24} color="#FFFFFF" />
-              <Text style={styles.mapControlText}>University</Text>
-            </TouchableOpacity>
             <TouchableOpacity 
               style={styles.mapControlButton}
-              onPress={() => router.push('/(tabs)/index?action=addMark')}
+              onPress={() => setIsAddingMarker(true)}
             >
               <Plus size={24} color="#FFFFFF" />
               <Text style={styles.mapControlText}>Add Mark</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.mapControlButton}>
-              <RotateCw size={24} color="#FFFFFF" />
+            <TouchableOpacity 
+              style={styles.mapControlButton}
+              onPress={handleRefresh}
+              disabled={refreshing}
+            >
+              <RotateCw 
+                size={24} 
+                color="#FFFFFF"
+                style={refreshing ? styles.rotating : undefined}
+              />
               <Text style={styles.mapControlText}>Refresh</Text>
             </TouchableOpacity>
           </View>
           {renderPinTypeModal()}
-          {isAddingPin && (
+          {renderMarkerPopup()}
+          {isAddingMarker && (
             <View style={styles.addMarkIndicator}>
               <Text style={styles.addMarkText}>{t('tapOnMapToAddMark')}</Text>
             </View>
@@ -366,6 +479,92 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  markerPopup: {
+    backgroundColor: '#1C1C1E',
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 400,
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  markerPopupHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2C2C2E',
+  },
+  categoryBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  iceBadge: {
+    backgroundColor: '#FF3B30',
+  },
+  observerBadge: {
+    backgroundColor: '#007AFF',
+  },
+  categoryText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+  },
+  closeButton: {
+    padding: 8,
+  },
+  markerImage: {
+    width: '100%',
+    height: 200,
+  },
+  markerInfo: {
+    padding: 16,
+  },
+  markerTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter-SemiBold',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  markerDescription: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#8E8E93',
+    marginBottom: 16,
+  },
+  markerMetadata: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  metadataText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#8E8E93',
+    marginLeft: 8,
+  },
+  markerStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    borderTopColor: '#2C2C2E',
+    paddingTop: 16,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statLabel: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: '#8E8E93',
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+    color: '#FFFFFF',
+  },
   modal: {
     backgroundColor: '#1C1C1E',
     borderRadius: 16,
@@ -373,12 +572,24 @@ const styles = StyleSheet.create({
     width: '90%',
     maxWidth: 400,
   },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   modalTitle: {
     fontFamily: 'Inter-SemiBold',
     fontSize: 20,
     color: '#FFFFFF',
-    marginBottom: 16,
-    textAlign: 'center',
+  },
+  cancelButton: {
+    padding: 8,
+  },
+  cancelButtonText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 16,
+    color: '#FF3B30',
   },
   imageButton: {
     flexDirection: 'row',
@@ -456,5 +667,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter-Regular',
     marginTop: 4,
+  },
+  rotating: {
+    transform: [{ rotate: '360deg' }],
   },
 });

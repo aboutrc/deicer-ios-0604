@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
-import { Map as MapIcon, CreditCard, Shield, Info, MessageCircle } from 'lucide-react-native';
+import { Map as MapIcon, CreditCard, Shield, Info, MessageSquare } from 'lucide-react-native';
 import { SplashScreen } from 'expo-router';
 
 // Prevent splash screen from auto-hiding
@@ -63,20 +63,20 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="chat2"
+          options={{
+            title: 'Chat',
+            tabBarIcon: ({ color, size }) => (
+              <MessageSquare size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="info"
           options={{
             title: 'Info',
             tabBarIcon: ({ color, size }) => (
               <Info size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="chat"
-          options={{
-            title: 'Chat',
-            tabBarIcon: ({ color, size }) => (
-              <MessageCircle size={size} color={color} />
             ),
           }}
         />

@@ -1,0 +1,155 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Platform, KeyboardAvoidingView } from 'react-native';
+import { useConversation } from '@elevenlabs/react';
+import { MicOff, Send, Phone, PhoneOff } from 'lucide-react-native';
+import { Audio } from 'expo-av';
+
+const StandaloneAgent = () => {
+  const [textInput, setTextInput] = useState('');
+  const [isStarting, setIsStarting] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [transcription, setTranscription] = useState(null);
+  const [error, setError] = useState(null);
+  const scrollViewRef = useRef(null);
+
+  const {
+    startSession,
+    endSession,
+    sendUserMessage,
+    sendUserActivity,
+    messages = [],
+    isSpeaking,
+    status,
+    error: conversationError,
+    transcript,
+  } = useConversation({
+    agentId: 'agent_01jwes334vfmvakwk5rpbxwtkd',
+    onConnect: () => console.log('Connected'),
+    onDisconnect: () => console.log('Disconnected'),
+    onMessage: (msg) => console.log('Message:', msg),
+    onError: (err) => {
+      console.error('Conversation error:', err);
+      setIsStarting(false);
+      setError(err.message || 'An error occurred during the conversation');
+    },
+    onTranscript: (text) => setTranscription(text),
+  });
+
+  const isConnected = status === 'connected';
+
+  useEffect(() => {
+    if (conversationError) {
+      setError(conversationError.message || 'An error occurred');
+    } else {
+      setError(null);
+    }
+  }, [conversationError]);
+
+  useEffect(() => {
+    if (!isSpeaking) {
+      setTranscription(null);
+    }
+  }, [isSpeaking]);
+
+  useEffect(() => {
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
+
+  const handleStart = async () => {
+    if (isStarting) return;
+    setError(null);
+    setIsStarting(true);
+
+    try {
+      await Audio.requestPermissionsAsync();
+      const sessionPromise = startSession();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Connection timed out')), 15000)
+      );
+      await Promise.race([sessionPromise, timeoutPromise]);
+    } catch (err) {
+      console.error('Error starting session:', err);
+      setError(err instanceof Error ? err.message : 'Failed to start');
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
+  const handleSendText = async () => {
+    if (!textInput.trim() || !isConnected) return;
+    try {
+      await sendUserMessage(textInput);
+      setTextInput('');
+    } catch (err) {
+      console.error('Error sending message:', err);
+      setError('Failed to send message');
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: '#000' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView ref={scrollViewRef} style={{ flex: 1, padding: 16 }}>
+        {messages.map((msg, idx) => (
+          <View
+            key={idx}
+            style={{
+              alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+              backgroundColor: msg.role === 'user' ? '#4f46e5' : '#1f2937',
+              padding: 10,
+              marginVertical: 4,
+              borderRadius: 12,
+              maxWidth: '80%',
+            }}
+          >
+            <Text style={{ color: '#fff' }}>{msg.content}</Text>
+          </View>
+        ))}
+        {transcription && (
+          <View style={{ alignSelf: 'flex-start', backgroundColor: '#374151', padding: 10, borderRadius: 12 }}>
+            <Text style={{ color: '#a3e635' }}>{transcription}</Text>
+          </View>
+        )}
+      </ScrollView>
+
+      <View style={{ flexDirection: 'row', padding: 8, alignItems: 'center', backgroundColor: '#111827' }}>
+        <TextInput
+          style={{ flex: 1, backgroundColor: '#374151', color: 'white', borderRadius: 8, paddingHorizontal: 12 }}
+          placeholder="Type your message..."
+          placeholderTextColor="#9ca3af"
+          value={textInput}
+          onChangeText={(text) => {
+            setTextInput(text);
+            if (isConnected) sendUserActivity();
+          }}
+          onSubmitEditing={handleSendText}
+        />
+        <TouchableOpacity onPress={handleSendText} style={{ marginLeft: 8 }}>
+          <Send color="white" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around', padding: 12, backgroundColor: '#111827' }}>
+        <TouchableOpacity onPress={handleStart} disabled={isConnected}>
+          {isStarting ? <ActivityIndicator color="#fff" /> : <Phone color={isConnected ? '#6b7280' : '#10b981'} />}
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setIsMuted(!isMuted)}>
+          <MicOff color={isMuted ? '#facc15' : '#3b82f6'} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={endSession} disabled={!isConnected}>
+          <PhoneOff color={!isConnected ? '#6b7280' : '#ef4444'} />
+        </TouchableOpacity>
+      </View>
+
+      {error && (
+        <View style={{ padding: 8, backgroundColor: '#b91c1c' }}>
+          <Text style={{ color: 'white' }}>{error}</Text>
+        </View>
+      )}
+    </KeyboardAvoidingView>
+  );
+};
+
+export default StandaloneAgent;

@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import { Globe, Map as MapIcon, CreditCard, Shield, MessageCircle, Info } from 'lucide-react-native';
+import { Globe, Map as MapIcon, CreditCard, Shield, MessageSquare, Info } from 'lucide-react-native';
 import { useRouter, usePathname } from 'expo-router';
 
 export default function PersistentHeader() {
@@ -12,7 +12,7 @@ export default function PersistentHeader() {
     { icon: MapIcon, label: 'Map', path: '/(tabs)/' },
     { icon: CreditCard, label: 'Card', path: '/(tabs)/card' },
     { icon: Shield, label: 'Protect', path: '/(tabs)/protect' },
-    { icon: MessageCircle, label: 'Chat', path: '/(tabs)/chat' },
+    { icon: MessageSquare, label: 'Chat', path: '/(tabs)/chat2' },
     { icon: Info, label: 'Info', path: '/(tabs)/info' }
   ];
 
@@ -30,12 +30,12 @@ export default function PersistentHeader() {
         {navigationItems.map((item, index) => (
           <TouchableOpacity
             key={index}
-            style={[styles.navItem, isActive(item.path) && styles.navItemActive]}
+            style={styles.navItem}
             onPress={() => router.push(item.path)}
           >
             <item.icon 
               size={24} 
-              color={isActive(item.path) ? '#FFFFFF' : '#666666'} 
+              color="#FFFFFF" 
             />
             <Text style={[
               styles.navText,
@@ -54,15 +54,17 @@ const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: '#000000',
     borderBottomWidth: 1,
-    borderBottomColor: '#2C2C2E',
+    borderBottomColor: '#333333',
   },
   topHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 60 : 30,
+    paddingTop: Platform.OS === 'ios' ? 80 : 50,
     paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333333',
   },
   logo: {
     color: '#FFFFFF',
@@ -92,18 +94,19 @@ const styles = StyleSheet.create({
   },
   navItem: {
     alignItems: 'center',
-    opacity: 0.6,
+    opacity: 0.7,
   },
   navItemActive: {
     opacity: 1,
   },
   navText: {
-    color: '#666666',
+    color: '#FFFFFF',
     fontSize: 12,
     fontFamily: 'Inter-Regular',
     marginTop: 4,
   },
   navTextActive: {
     color: '#FFFFFF',
+    opacity: 1
   },
 });

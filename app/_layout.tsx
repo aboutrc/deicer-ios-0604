@@ -7,6 +7,7 @@ import PersistentHeader from '@/components/PersistentHeader';
 import PersistentFooter from '@/components/PersistentFooter';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { MarkerProvider } from '@/context/MarkerContext';
 
 export default function RootLayout() {
   useFrameworkReady();
@@ -14,21 +15,23 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <LanguageProvider>
-        <View style={{ flex: 1, backgroundColor: '#000000' }}>
-          <StatusBar style="light" />
-          <PersistentHeader />
-          <Stack 
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: '#000000' }
-            }}
-          >
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="event-details" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <PersistentFooter />
-        </View>
+        <MarkerProvider>
+          <View style={{ flex: 1, backgroundColor: '#000000' }}>
+            <StatusBar style="light" />
+            <PersistentHeader />
+            <Stack 
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: '#000000' }
+              }}
+            >
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="event-details" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <PersistentFooter />
+          </View>
+        </MarkerProvider>
       </LanguageProvider>
     </AuthProvider>
   );
