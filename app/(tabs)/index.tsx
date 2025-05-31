@@ -2,11 +2,13 @@ import { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, Text, Platform, TouchableOpacity, Image, Alert, Modal } from 'react-native';
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
-import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MapPin, CircleAlert as AlertCircle, Loader as Loader2, Camera, Eye, Shield, Search, Plus, RotateCw, Clock, X } from 'lucide-react-native';
+import { MapPin, CircleAlert as AlertCircle, Loader as Loader2, Camera, Eye, Shield, Search, Plus, RotateCw, Clock, X, GraduationCap } from 'lucide-react-native';
 import { useLanguage } from '@/context/LanguageContext';
+import SearchLocationModal from '@/components/SearchLocationModal';
 import { useMarkers } from '@/context/MarkerContext';
+import UniversitiesModal from '@/components/UniversitiesModal';
 
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -17,6 +19,8 @@ export default function MapScreen() {
   const [showPinTypeModal, setShowPinTypeModal] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{latitude: number, longitude: number} | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
+  const [showUniversitiesModal, setShowUniversitiesModal] = useState(false);
+  const [showSearchLocationModal, setShowSearchLocationModal] = useState(false);
   const mapRef = useRef<any>(null);
   const router = useRouter();
   const { t, isInitialized } = useLanguage();
@@ -118,6 +122,16 @@ export default function MapScreen() {
 
   const handleReportEvent = () => {
     router.push('/report');
+  };
+
+  const handleUniversitySelect = (latitude: number, longitude: number) => {
+    const region: Region = {
+      latitude,
+      longitude,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    };
+    mapRef.current?.animateToRegion(region, 1000);
   };
 
   const renderMarkerPopup = () => {
@@ -329,9 +343,19 @@ export default function MapScreen() {
         <>
           {renderMap()}
           <View style={styles.mapControls}>
-            <TouchableOpacity style={styles.mapControlButton}>
+            <TouchableOpacity 
+              style={styles.mapControlButton}
+              onPress={() => setShowSearchLocationModal(true)}
+            >
               <Search size={24} color="#FFFFFF" />
               <Text style={styles.mapControlText}>Search</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.mapControlButton}
+              onPress={() => setShowUniversitiesModal(true)}
+            >
+              <GraduationCap size={24} color="#FFFFFF" />
+              <Text style={styles.mapControlText}>University</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.mapControlButton}
@@ -355,6 +379,16 @@ export default function MapScreen() {
           </View>
           {renderPinTypeModal()}
           {renderMarkerPopup()}
+          <SearchLocationModal
+            visible={showSearchLocationModal}
+            onClose={() => setShowSearchLocationModal(false)}
+            onSelectLocation={handleUniversitySelect}
+          />
+          <UniversitiesModal
+            visible={showUniversitiesModal}
+            onClose={() => setShowUniversitiesModal(false)}
+            onSelectUniversity={handleUniversitySelect}
+          />
           {isAddingMarker && (
             <View style={styles.addMarkIndicator}>
               <Text style={styles.addMarkText}>{t('tapOnMapToAddMark')}</Text>
