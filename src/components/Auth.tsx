@@ -1,113 +1,110 @@
-import React from 'react';
-import { Auth as SupabaseAuth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { Loader2, LogIn, Mail } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface AuthProps {
-  language?: 'en' | 'es' | 'zh' | 'hi' | 'ar';
+  onAuthChange: (session: any) => void;
 }
 
-const Auth: React.FC<AuthProps> = ({ language = 'en' }) => {
-  const translations = {
-    en: {
-      sign_in: 'Sign In',
-      sign_up: 'Sign Up',
-      email: 'Email',
-      password: 'Password',
-      forgot_password: 'Forgot Password?',
-      magic_link: 'Send Magic Link',
-      loading: 'Loading...',
-      email_input_placeholder: 'Your email address',
-      password_input_placeholder: 'Your password',
-      confirmation_text: "We've sent you an email with a link to reset your password.",
-    },
-    es: {
-      sign_in: 'Iniciar Sesión',
-      sign_up: 'Registrarse',
-      email: 'Correo',
-      password: 'Contraseña',
-      forgot_password: '¿Olvidaste tu contraseña?',
-      magic_link: 'Enviar enlace mágico',
-      loading: 'Cargando...',
-      email_input_placeholder: 'Tu correo electrónico',
-      password_input_placeholder: 'Tu contraseña',
-      confirmation_text: 'Te hemos enviado un correo con un enlace para restablecer tu contraseña.',
-    },
-    zh: {
-      sign_in: '登录',
-      sign_up: '注册',
-      email: '邮箱',
-      password: '密码',
-      forgot_password: '忘记密码？',
-      magic_link: '发送魔法链接',
-      loading: '加载中...',
-      email_input_placeholder: '你的邮箱地址',
-      password_input_placeholder: '你的密码',
-      confirmation_text: '我们已经发送了一封包含重置密码链接的邮件给你。',
-    },
-    hi: {
-      sign_in: 'साइन इन',
-      sign_up: 'साइन अप',
-      email: 'ईमेल',
-      password: 'पासवर्ड',
-      forgot_password: 'पासवर्ड भूल गए?',
-      magic_link: 'मैजिक लिंक भेजें',
-      loading: 'लोड हो रहा है...',
-      email_input_placeholder: 'आपका ईमेल पता',
-      password_input_placeholder: 'आपका पासवर्ड',
-      confirmation_text: 'हमने आपको पासवर्ड रीसेट लिंक के साथ एक ईमेल भेजा है।',
-    },
-    ar: {
-      sign_in: 'تسجيل الدخول',
-      sign_up: 'إنشاء حساب',
-      email: 'البريد الإلكتروني',
-      password: 'كلمة المرور',
-      forgot_password: 'نسيت كلمة المرور؟',
-      magic_link: 'إرسال رابط سحري',
-      loading: 'جار التحميل...',
-      email_input_placeholder: 'عنوان بريدك الإلكتروني',
-      password_input_placeholder: 'كلمة المرور الخاصة بك',
-      confirmation_text: 'لقد أرسلنا لك بريدًا إلكترونيًا يحتوي على رابط لإعادة تعيين كلمة المرور.',
+const Auth: React.FC<AuthProps> = ({ onAuthChange }) => {
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        onAuthChange(session);
+      }
+    );
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      onAuthChange(session);
+    });
+
+    // Cleanup subscription
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [onAuthChange]);
+
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast.error('Please enter your email');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOtp({
+        email
+      });
+
+      if (error) throw error;
+      toast.success('Check your email for the magic link!');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send magic link');
+      console.error('Magic link error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-xl p-8">
-        <SupabaseAuth
-          supabaseClient={supabase}
-          appearance={{
-            theme: ThemeSupa,
-            variables: {
-              default: {
-                colors: {
-                  brand: '#3b82f6',
-                  brandAccent: '#2563eb',
-                  brandButtonText: 'white',
-                  defaultButtonBackground: '#1f2937',
-                  defaultButtonBackgroundHover: '#374151',
-                  inputBackground: '#1f2937',
-                  inputBorder: '#374151',
-                  inputBorderHover: '#4b5563',
-                  inputBorderFocus: '#3b82f6',
-                  inputText: 'white',
-                  inputPlaceholder: '#9ca3af',
-                }
-              }
-            },
-            className: {
-              container: 'auth-container',
-              label: 'text-gray-300 font-medium',
-              button: 'rounded-lg font-medium',
-              input: 'rounded-lg',
-              message: 'text-gray-400'
-            }
-          }}
-          localization={{
-            variables: translations[language]
-          }}
-          providers={[]}
-        />
+    <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-gray-900 p-8 rounded-lg shadow-xl">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+            DEICER App  IOS / Android
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-400">
+            Enter your email and we'll send a magic link
+          </p>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleMagicLink}>
+          <div>
+            <div>
+              <label htmlFor="email-address" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-800 placeholder-gray-500 text-white bg-gray-900 focus:outline-none focus:ring-gray-700 focus:border-gray-700 focus:z-10 sm:text-sm"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-gray-800 text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700 disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" />
+                  Sending magic link...
+                </>
+              ) : (
+                <>
+                  <Mail className="-ml-1 mr-2 h-5 w-5" />
+                  Send Magic Link
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
