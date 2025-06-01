@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated, Dimensions, Linking } from 'react-native';
 import { Heart } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 
@@ -23,7 +23,7 @@ export default function PersistentFooter() {
   }, []);
 
   const handleDonate = () => {
-    Linking.openURL('https://example.com/donate');
+    Linking.openURL('https://deicer.org/donate');
   };
 
   return (

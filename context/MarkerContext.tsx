@@ -190,3 +190,5 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
     </MarkerContext.Provider>
   );
 };
+
+export { MarkerProvider }

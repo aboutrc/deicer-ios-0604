@@ -3,8 +3,6 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { View } from 'react-native';
-import PersistentHeader from '@/components/PersistentHeader';
-import PersistentFooter from '@/components/PersistentFooter';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { MarkerProvider } from '@/context/MarkerContext';
@@ -18,7 +16,6 @@ export default function RootLayout() {
         <MarkerProvider>
           <View style={{ flex: 1, backgroundColor: '#000000' }}>
             <StatusBar style="light" />
-            <PersistentHeader />
             <Stack 
               screenOptions={{
                 headerShown: false,
@@ -29,7 +26,6 @@ export default function RootLayout() {
               <Stack.Screen name="event-details" options={{ presentation: 'modal' }} />
               <Stack.Screen name="+not-found" />
             </Stack>
-            <PersistentFooter />
           </View>
         </MarkerProvider>
       </LanguageProvider>

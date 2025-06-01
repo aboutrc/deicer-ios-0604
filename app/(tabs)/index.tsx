@@ -1,16 +1,19 @@
 import { useEffect, useState, useRef } from 'react';
-import { View, StyleSheet, Text, Platform, TouchableOpacity, Image, Alert, Modal } from 'react-native';
+import { View, StyleSheet, Text, Platform, TouchableOpacity, Image, Alert, Modal, ScrollView } from 'react-native';
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
-import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import MapView, { Marker as RNMarker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MapPin, CircleAlert as AlertCircle, Loader as Loader2, Camera, Eye, Shield, Search, Plus, RotateCw, Clock, X, GraduationCap } from 'lucide-react-native';
+import { MapPin, CircleAlert as AlertCircle, Loader as Loader2, Camera, Eye, Shield, Search, Plus, RotateCw, Clock, X, GraduationCap, Bug } from 'lucide-react-native';
 import { useLanguage } from '@/context/LanguageContext';
 import SearchLocationModal from '@/components/SearchLocationModal';
 import { useMarkers } from '@/context/MarkerContext';
 import UniversitiesModal from '@/components/UniversitiesModal';
+import type { Marker } from '@/context/MarkerContext';
+import { supabase } from '@/lib/supabase';
 
 export default function MapScreen() {
+  const { t, isInitialized } = useLanguage();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -21,9 +24,10 @@ export default function MapScreen() {
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
   const [showUniversitiesModal, setShowUniversitiesModal] = useState(false);
   const [showSearchLocationModal, setShowSearchLocationModal] = useState(false);
+  const [showTestResults, setShowTestResults] = useState(false);
+  const [testResults, setTestResults] = useState<any[]>([]);
   const mapRef = useRef<any>(null);
   const router = useRouter();
-  const { t, isInitialized } = useLanguage();
   const params = useLocalSearchParams();
   const { markers, isAddingMarker, setIsAddingMarker, addMarker, loading: markersLoading, refreshMarkers } = useMarkers();
 
@@ -95,53 +99,120 @@ export default function MapScreen() {
     }
   };
 
-  useEffect(() => {
-    if (!isInitialized) return;
+  const handleUniversitySelect = (coordinates: { latitude: number; longitude: number }) => {
+    if (!mapRef.current) return;
 
-    (async () => {
-      try {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          setErrorMsg(t('locationPermissionDenied') || 'Location permission denied');
-          setLoading(false);
-          return;
-        }
+    const region: Region = {
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    };
 
-        let location = await Location.getCurrentPositionAsync({});
-        setLocation(location);
-        
-        // Fetch events from API
-      } catch (error) {
-        setErrorMsg(t('errorFetchingLocation') || 'Error fetching location');
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [isInitialized, t]);
-
-  const handleReportEvent = () => {
-    router.push('/report');
+    mapRef.current.animateToRegion(region, 1000);
+    setShowUniversitiesModal(false);
+    setShowSearchLocationModal(false);
   };
 
-  const handleUniversitySelect = (latitude: number, longitude: number) => {
-    const region: Region = {
-      latitude,
-      longitude,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
-    };
-    mapRef.current?.animateToRegion(region, 1000);
+  const runExpirationTest = async () => {
+    try {
+      // Reset test environment (cleans up old markers and creates new ones)
+      await supabase.rpc('reset_test_environment');
+      
+      // Wait 2 seconds for the trigger to process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Verify results
+      const { data, error } = await supabase.rpc('verify_expired_markers');
+      
+      if (error) throw error;
+      setTestResults(data);
+      setShowTestResults(true);
+    } catch (err) {
+      console.error('Error running expiration test:', err);
+      Alert.alert('Error', 'Failed to run expiration test');
+    }
+  };
+
+  const renderPinTypeModal = () => {
+    if (!showPinTypeModal) return null;
+
+    return (
+      <Modal
+        visible={showPinTypeModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowPinTypeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Pin Type</Text>
+              <TouchableOpacity
+                onPress={() => setShowPinTypeModal(false)}
+                style={styles.cancelButton}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.imageButton}
+              onPress={handleSelectImage}
+            >
+              <Camera size={24} color="#007AFF" />
+              <Text style={styles.imageButtonText}>
+                {selectedImage ? 'Change Image' : 'Add Image'}
+              </Text>
+            </TouchableOpacity>
+
+            {selectedImage && (
+              <Image
+                source={{ uri: selectedImage }}
+                style={styles.selectedImage}
+                resizeMode="cover"
+              />
+            )}
+
+            <View style={styles.pinTypeContainer}>
+              <TouchableOpacity
+                style={[styles.pinTypeButton, styles.iceButton]}
+                onPress={() => handleAddMarker('ice')}
+              >
+                <Shield size={24} color="#FFFFFF" />
+                <Text style={styles.pinTypeText}>ICE</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.pinTypeButton, styles.observerButton]}
+                onPress={() => handleAddMarker('observer')}
+              >
+                <Eye size={24} color="#FFFFFF" />
+                <Text style={styles.pinTypeText}>Observer</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.pinTypeNote}>
+              Select the type of pin to add to the map
+            </Text>
+          </View>
+        </View>
+      </Modal>
+    );
   };
 
   const renderMarkerPopup = () => {
     if (!selectedMarker) return null;
 
+    const formatDate = (date: string) => {
+      return new Date(date).toLocaleString();
+    };
+
     return (
       <Modal
         visible={!!selectedMarker}
         transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setSelectedMarker(null)}
       >
         <View style={styles.modalOverlay}>
@@ -155,7 +226,7 @@ export default function MapScreen() {
                   {selectedMarker.category.toUpperCase()}
                 </Text>
               </View>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setSelectedMarker(null)}
                 style={styles.closeButton}
               >
@@ -164,7 +235,7 @@ export default function MapScreen() {
             </View>
 
             {selectedMarker.image_url && (
-              <Image 
+              <Image
                 source={{ uri: selectedMarker.image_url }}
                 style={styles.markerImage}
                 resizeMode="cover"
@@ -174,11 +245,11 @@ export default function MapScreen() {
             <View style={styles.markerInfo}>
               <Text style={styles.markerTitle}>{selectedMarker.title}</Text>
               <Text style={styles.markerDescription}>{selectedMarker.description}</Text>
-              
+
               <View style={styles.markerMetadata}>
                 <Clock size={16} color="#8E8E93" />
                 <Text style={styles.metadataText}>
-                  {new Date(selectedMarker.created_at).toLocaleString()}
+                  Created: {formatDate(selectedMarker.created_at)}
                 </Text>
               </View>
 
@@ -219,16 +290,57 @@ export default function MapScreen() {
         provider={PROVIDER_GOOGLE}
         showsUserLocation
         showsMyLocationButton
-        initialRegion={location ? {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        } : undefined}
+        initialRegion={{
+          // Center of continental US (approximately Kansas)
+          latitude: 39.8283,
+          longitude: -98.5795,
+          // Zoom level to show most of continental US
+          latitudeDelta: 50,
+          longitudeDelta: 60,
+        }}
+        minZoomLevel={3}  // Prevent zooming out too far
+        maxZoomLevel={20} // Allow detailed zoom
+        // Limit the boundries to continental US
+        region={{
+          latitude: 39.8283,
+          longitude: -98.5795,
+          latitudeDelta: 50,
+          longitudeDelta: 60,
+        }}
+        // Set map boundaries
+        mapPadding={{
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
+        }}
+        // Limit scrollable area to continental US
+        legalLabelInsets={{
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
+        }}
         onPress={handleMapPress}
+        // Restrict map boundaries
+        onRegionChangeComplete={(region) => {
+          // Keep latitude between bounds of continental US
+          const newLat = Math.min(Math.max(region.latitude, 24.396308), 49.384358);
+          // Keep longitude between bounds of continental US
+          const newLng = Math.min(Math.max(region.longitude, -125.000000), -66.934570);
+          
+          if (newLat !== region.latitude || newLng !== region.longitude) {
+            mapRef.current?.animateToRegion({
+              latitude: newLat,
+              longitude: newLng,
+              latitudeDelta: region.latitudeDelta,
+              longitudeDelta: region.longitudeDelta,
+            }, 100);
+          }
+        }}
       >
         {selectedLocation && (
-          <Marker
+          <RNMarker
             coordinate={{
               latitude: selectedLocation.latitude,
               longitude: selectedLocation.longitude
@@ -236,11 +348,11 @@ export default function MapScreen() {
             pinColor="#FF3B30"
           >
             <MapPin size={28} color="#007AFF" />
-          </Marker>
+          </RNMarker>
         )}
         
         {markers.map((marker) => (
-          <Marker
+          <RNMarker
             key={marker.id}
             coordinate={{
               latitude: marker.latitude,
@@ -252,69 +364,9 @@ export default function MapScreen() {
               size={28} 
               color={marker.category === 'ice' ? '#FF3B30' : '#007AFF'} 
             />
-          </Marker>
+          </RNMarker>
         ))}
       </MapView>
-    );
-  };
-
-  const renderPinTypeModal = () => {
-    if (!showPinTypeModal) return null;
-
-    const handleCancel = () => {
-      setShowPinTypeModal(false);
-      setSelectedLocation(null);
-      setSelectedImage(null);
-    };
-
-    return (
-      <View style={styles.modalOverlay}>
-        <View style={styles.modal}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Add New Pin</Text>
-            <TouchableOpacity 
-              style={styles.cancelButton}
-              onPress={handleCancel}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <TouchableOpacity style={styles.imageButton} onPress={handleSelectImage}>
-            <Camera size={24} color="#007AFF" />
-            <Text style={styles.imageButtonText}>
-              {selectedImage ? 'Change Photo' : 'Add Photo (Optional)'}
-            </Text>
-          </TouchableOpacity>
-
-          {selectedImage && (
-            <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
-          )}
-
-          <View style={styles.pinTypeContainer}>
-            <TouchableOpacity 
-              style={[styles.pinTypeButton, styles.iceButton]}
-              onPress={() => handleAddMarker('ice')}
-            >
-              <Shield size={24} color="#FFF" />
-              <Text style={styles.pinTypeText}>ICE</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.pinTypeButton, styles.observerButton]}
-              onPress={() => handleAddMarker('observer')}
-            >
-              <Eye size={24} color="#FFF" />
-              <Text style={styles.pinTypeText}>Observer</Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.pinTypeNote}>
-            Observer markers expire after 1 hour{'\n'}
-            ICE markers remain active for 24 hours
-          </Text>
-        </View>
-      </View>
     );
   };
 
@@ -367,14 +419,19 @@ export default function MapScreen() {
             <TouchableOpacity 
               style={styles.mapControlButton}
               onPress={handleRefresh}
-              disabled={refreshing}
-            >
+              disabled={refreshing}>
               <RotateCw 
                 size={24} 
                 color="#FFFFFF"
                 style={refreshing ? styles.rotating : undefined}
               />
               <Text style={styles.mapControlText}>Refresh</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.mapControlButton}
+              onPress={runExpirationTest}>
+              <Bug size={24} color="#FFFFFF" />
+              <Text style={styles.mapControlText}>Test</Text>
             </TouchableOpacity>
           </View>
           {renderPinTypeModal()}
@@ -392,6 +449,43 @@ export default function MapScreen() {
           {isAddingMarker && (
             <View style={styles.addMarkIndicator}>
               <Text style={styles.addMarkText}>{t('tapOnMapToAddMark')}</Text>
+            </View>
+          )}
+          {showTestResults && (
+            <View style={styles.testResults}>
+              <View style={styles.testResultsHeader}>
+                <Text style={styles.testResultsTitle}>Expiration Test Results</Text>
+                <TouchableOpacity 
+                  onPress={() => setShowTestResults(false)}
+                  style={styles.closeButton}>
+                  <X size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+              <ScrollView style={styles.testResultsList}>
+                {testResults.map((result, index) => (
+                  <View key={index} style={styles.testResultItem}>
+                    <Text style={styles.testResultTitle}>{result.title}</Text>
+                    <Text style={styles.testResultDetail}>
+                      Created: {new Date(result.created_at).toLocaleString()}
+                    </Text>
+                    <Text style={styles.testResultDetail}>
+                      Expires: {new Date(result.expiration_time).toLocaleString()}
+                    </Text>
+                    <View style={[
+                      styles.testResultStatus,
+                      result.should_be_expired === result.is_expired 
+                        ? styles.testResultSuccess 
+                        : styles.testResultFailure
+                    ]}>
+                      <Text style={styles.testResultStatusText}>
+                        {result.should_be_expired === result.is_expired 
+                          ? '✓ Working correctly' 
+                          : '✗ Not working as expected'}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
             </View>
           )}
         </>
@@ -704,5 +798,65 @@ const styles = StyleSheet.create({
   },
   rotating: {
     transform: [{ rotate: '360deg' }],
+  },
+  testResults: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -150 }, { translateY: -200 }],
+    width: 300,
+    maxHeight: 400,
+    backgroundColor: '#1C1C1E',
+    borderRadius: 12,
+    padding: 16,
+  },
+  testResultsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  testResultsTitle: {
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+    color: '#FFFFFF',
+  },
+  testResultsList: {
+    flex: 1,
+  },
+  testResultItem: {
+    backgroundColor: '#2C2C2E',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+  },
+  testResultTitle: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  testResultDetail: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: '#8E8E93',
+    marginBottom: 2,
+  },
+  testResultStatus: {
+    marginTop: 8,
+    padding: 8,
+    borderRadius: 4,
+  },
+  testResultSuccess: {
+    backgroundColor: '#1C7D3D',
+  },
+  testResultFailure: {
+    backgroundColor: '#881337',
+  },
+  testResultStatusText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    color: '#FFFFFF',
+    textAlign: 'center',
   },
 });

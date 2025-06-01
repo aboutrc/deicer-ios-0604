@@ -1,9 +1,11 @@
 import { Tabs } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { Map as MapIcon, CreditCard, Shield, Info, MessageSquare } from 'lucide-react-native';
 import { SplashScreen } from 'expo-router';
+import PersistentHeader from '@/components/PersistentHeader';
+import PersistentFooter from '@/components/PersistentFooter';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -27,6 +29,7 @@ export default function TabLayout() {
 
   return (
     <View style={styles.mainContainer}>
+      <PersistentHeader />
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -81,6 +84,7 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
+      <PersistentFooter />
     </View>
   );
 }
