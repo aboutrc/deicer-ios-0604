@@ -1,16 +1,17 @@
 import { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, Text, Platform, TouchableOpacity, Image, Alert, Modal, ScrollView } from 'react-native';
+import Animated, { withSpring, withRepeat, withSequence } from 'react-native-reanimated';
 import * as Location from 'expo-location';
-import * as ImagePicker from 'expo-image-picker';
-import MapView, { Marker as RNMarker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import MapView, { Marker as RNMarker, PROVIDER_GOOGLE, Region, LatLng } from 'react-native-maps';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MapPin, CircleAlert as AlertCircle, Loader as Loader2, Camera, Eye, Shield, Search, Plus, RotateCw, Clock, X, GraduationCap, Trash2 } from 'lucide-react-native';
+import { MapPin, CircleAlert as AlertCircle, Loader as Loader2, Eye, Shield, Search, Plus, RotateCw, Clock, X, GraduationCap, Trash2, Navigation, Camera } from 'lucide-react-native';
 import { useLanguage } from '@/context/LanguageContext';
 import SearchLocationModal from '@/components/SearchLocationModal';
 import { useMarkers } from '@/context/MarkerContext';
 import UniversitiesModal from '@/components/UniversitiesModal';
 import type { Marker } from '@/context/MarkerContext';
 import { supabase } from '@/lib/supabase';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function MapScreen() {
   const { t, isInitialized } = useLanguage();
@@ -19,16 +20,80 @@ export default function MapScreen() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [clearing, setClearing] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showPinTypeModal, setShowPinTypeModal] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{latitude: number, longitude: number} | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showUniversitiesModal, setShowUniversitiesModal] = useState(false);
   const [showSearchLocationModal, setShowSearchLocationModal] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [initialRegion, setInitialRegion] = useState<Region | null>(null);
   const mapRef = useRef<any>(null);
   const router = useRouter();
+  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
   const params = useLocalSearchParams();
-  const { markers, isAddingMarker, setIsAddingMarker, addMarker, loading: markersLoading, refreshMarkers } = useMarkers();
+  const { markers, isAddingMarker, isUploading = false, setIsAddingMarker, addMarker, loading: markersLoading, refreshMarkers } = useMarkers();
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      try {
+        if (status !== 'granted') {
+          Alert.alert(
+            'Location Required',
+            'As a security feature, pins are not allowed to be placed if we cannot see your location. Please ensure you have location services turned on.',
+            [{ text: 'OK' }]
+          );
+          return;
+        }
+
+        const location = await Location.getCurrentPositionAsync({});
+        setUserLocation(location);
+        
+        // Set initial region to user's location with 1-mile radius
+        const region = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          // These deltas approximately show a 1-mile radius
+          latitudeDelta: 0.0122,
+          longitudeDelta: 0.0121,
+        };
+        setInitialRegion(region);
+        
+        // Animate map to user's location
+        if (mapRef.current) {
+          mapRef.current.animateToRegion(region, 1000);
+        }
+      } catch (err) {
+        console.error('Error getting location:', err);
+        Alert.alert(
+          'Location Required',
+          'As a security feature, pins are not allowed to be placed if we cannot see your location. Please ensure you have location services turned on.',
+          [{ text: 'OK' }]
+        );
+      }
+    })();
+  }, []);
+
+  const centerOnUserLocation = async () => {
+    try {
+      const location = await Location.getCurrentPositionAsync({});
+      setUserLocation(location);
+      
+      if (mapRef.current && location) {
+        mapRef.current.animateToRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }, 1000);
+      }
+    } catch (err) {
+      console.error('Error getting location:', err);
+      Alert.alert('Error', 'Could not get your location');
+    }
+  };
 
   // Refresh markers on initial load
   useEffect(() => {
@@ -53,35 +118,96 @@ export default function MapScreen() {
   const handleMapPress = (event: any) => {
     if (!isAddingMarker) return;
     
+    if (!event?.nativeEvent?.coordinate?.latitude || !event?.nativeEvent?.coordinate?.longitude) {
+      console.error('Invalid map press event:', event);
+      Alert.alert('Error', 'Could not determine tap location. Please try again.');
+      return;
+    }
+    
+    // Use existing userLocation instead of requesting again
+    if (!userLocation) {
+      Alert.alert(
+        'Location Required',
+        'As a security feature, pins are not allowed to be placed if we cannot see your location. Please ensure you have location services turned on.',
+        [
+          {
+            text: 'OK',
+            style: 'default',
+            onPress: () => setIsAddingMarker(false)
+          }
+        ],
+        { userInterfaceStyle: 'dark' }
+      );
+      return;
+    }
+
+    const distance = calculateDistance(
+      userLocation.coords.latitude,
+      userLocation.coords.longitude,
+      event.nativeEvent.coordinate.latitude,
+      event.nativeEvent.coordinate.longitude
+    );
+    
+    if (distance > 0.5) {
+      // Show styled modal instead of alert
+      Alert.alert('Location Too Far',
+        'You can only create markers within 1/2 mile of your current location.',
+        [
+          {
+            text: 'OK',
+            style: 'default',
+            onPress: () => setIsAddingMarker(false)
+          }
+        ],
+        {
+          userInterfaceStyle: 'dark',
+        }
+      );
+      return;
+    }
+    
     setSelectedLocation({
       latitude: event.nativeEvent.coordinate.latitude,
       longitude: event.nativeEvent.coordinate.longitude
     });
     setShowPinTypeModal(true);
-    setIsAddingMarker(false);
   };
 
-  const handleSelectImage = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.8,
-        allowsEditing: true,
-      });
-
-      if (!result.canceled) {
-        setSelectedImage(result.assets[0].uri);
-      }
-    } catch (err) {
-      console.error('Error selecting image:', err);
-      Alert.alert('Error', 'Failed to select image');
-    }
+  // Helper function to calculate distance between two points in miles
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number => {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
   };
 
   const handleAddMarker = async (category: 'ice' | 'observer') => {
     if (!selectedLocation) return;
 
+    setUploadProgress(0);
     try {
+      setIsAddingMarker(false);
+      
+      // Start progress animation
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += 0.1;
+        if (progress > 0.9) {
+          clearInterval(progressInterval);
+        }
+        setUploadProgress(progress);
+      }, 100);
+
       await addMarker({
         latitude: selectedLocation.latitude,
         longitude: selectedLocation.longitude,
@@ -89,6 +215,8 @@ export default function MapScreen() {
         imageUri: selectedImage
       });
 
+      setUploadProgress(1);
+      setUploadingImage(false);
       setSelectedImage(null);
       setShowPinTypeModal(false);
       setSelectedLocation(null);
@@ -140,6 +268,23 @@ export default function MapScreen() {
     );
   };
 
+  const handleSelectImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.images,
+        quality: 0.8,
+        allowsEditing: true,
+      });
+
+      if (!result.canceled) {
+        setSelectedImage(result.assets[0].uri);
+      }
+    } catch (err) {
+      console.error('Error selecting image:', err);
+      Alert.alert('Error', 'Failed to select image');
+    }
+  };
+
   const renderPinTypeModal = () => {
     if (!showPinTypeModal) return null;
 
@@ -157,6 +302,11 @@ export default function MapScreen() {
               <TouchableOpacity
                 onPress={() => setShowPinTypeModal(false)}
                 style={styles.cancelButton}
+                onPress={() => {
+                  setShowPinTypeModal(false);
+                  setIsAddingMarker(false);
+                  setSelectedLocation(null);
+                }}
               >
                 <Text style={styles.cancelButtonText}>{t('cancel')}</Text>
               </TouchableOpacity>
@@ -183,18 +333,28 @@ export default function MapScreen() {
             <View style={styles.pinTypeContainer}>
               <TouchableOpacity
                 style={[styles.pinTypeButton, styles.iceButton]}
-                onPress={() => handleAddMarker('ice')}
-              >
+                disabled={isUploading}
+                onPress={() => handleAddMarker('ice')}>
                 <Shield size={24} color="#FFFFFF" />
                 <Text style={styles.pinTypeText}>{t('ice')}</Text>
+                {isUploading && (
+                  <View style={styles.progressBarContainer}>
+                    <View style={[styles.progressBar, { width: `${uploadProgress * 100}%` }]} />
+                  </View>
+                )}
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.pinTypeButton, styles.observerButton]}
-                onPress={() => handleAddMarker('observer')}
-              >
+                disabled={isUploading}
+                onPress={() => handleAddMarker('observer')}>
                 <Eye size={24} color="#FFFFFF" />
                 <Text style={styles.pinTypeText}>{t('observer')}</Text>
+                {isUploading && (
+                  <View style={styles.progressBarContainer}>
+                    <View style={[styles.progressBar, { width: `${uploadProgress * 100}%` }]} />
+                  </View>
+                )}
               </TouchableOpacity>
             </View>
 
@@ -233,8 +393,8 @@ export default function MapScreen() {
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => setSelectedMarker(null)}
                 style={styles.closeButton}
+                onPress={() => setSelectedMarker(null)}
               >
                 <X size={24} color="#FFFFFF" />
               </TouchableOpacity>
@@ -296,7 +456,7 @@ export default function MapScreen() {
         provider={PROVIDER_GOOGLE}
         showsUserLocation
         showsMyLocationButton
-        initialRegion={{
+        initialRegion={initialRegion || {
           // Center of continental US (approximately Kansas)
           latitude: 39.8283,
           longitude: -98.5795,
@@ -403,6 +563,13 @@ export default function MapScreen() {
           <View style={styles.mapControls}>
             <TouchableOpacity 
               style={styles.mapControlButton}
+              onPress={centerOnUserLocation}
+            >
+              <Navigation size={24} color="#FFFFFF" />
+              <Text style={styles.mapControlText}>{t('location')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.mapControlButton}
               onPress={() => setShowSearchLocationModal(true)}
             >
               <Search size={24} color="#FFFFFF" />
@@ -433,14 +600,6 @@ export default function MapScreen() {
                 style={refreshing ? styles.rotating : undefined}
               />
               <Text style={styles.mapControlText}>{t('refresh')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.mapControlButton}
-              onPress={handleClearMarkers}
-              disabled={clearing || markersLoading}
-            >
-              <Trash2 size={24} color="#FFFFFF" />
-              <Text style={styles.mapControlText}>Clear</Text>
             </TouchableOpacity>
           </View>
           {renderPinTypeModal()}
@@ -583,9 +742,45 @@ const styles = StyleSheet.create({
     backgroundColor: '#1C1C1E',
     borderRadius: 16,
     width: '90%',
-    maxWidth: 400,
+    maxWidth: 500,
     maxHeight: '80%',
     overflow: 'hidden',
+  },
+  locationAlertModal: {
+    backgroundColor: '#1C1C1E',
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 400,
+    padding: 24,
+  },
+  locationAlertTitle: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 20,
+    color: '#FFFFFF',
+    marginBottom: 12,
+  },
+  locationAlertMessage: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 16,
+    color: '#8E8E93',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  locationAlertButton: {
+    backgroundColor: '#FF3B30',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+  },
+  locationAlertButtonText: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 16,
+    color: '#FFFFFF',
+  },
+  markerImage: {
+    width: '100%',
+    height: 250,
+    backgroundColor: '#2C2C2E',
   },
   markerPopupHeader: {
     flexDirection: 'row',
@@ -613,10 +808,6 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 8,
-  },
-  markerImage: {
-    width: '100%',
-    height: 200,
   },
   markerInfo: {
     padding: 16,
@@ -722,10 +913,12 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     padding: 16,
     borderRadius: 8,
     marginHorizontal: 8,
+    position: 'relative',
+    overflow: 'hidden',
   },
   iceButton: {
     backgroundColor: '#FF3B30',
@@ -738,6 +931,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#FFF',
     marginLeft: 8,
+    zIndex: 1,
+  },
+  progressBarContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: 'rgba(255,255,255,0.2)',
   },
   pinTypeNote: {
     fontFamily: 'Inter-Regular',

@@ -46,7 +46,7 @@ export default function PersistentHeader() {
       <View style={styles.topHeader}>
         <View style={styles.logoContainer}>
           <Image
-            source={require('@/assets/images/deicer-badge-sm.png')}
+            source={require('@/assets/images/icons/ios-dark.png')}
             style={styles.logoImage}
             resizeMode="contain"
           />
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   logoImage: {
     width: 30,
     height: 30,
-    marginRight: 8,
+    marginRight: 8
   },
   logo: {
     color: '#FFFFFF',

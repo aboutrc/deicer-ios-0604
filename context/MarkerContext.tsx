@@ -10,7 +10,9 @@ type Marker = Database['public']['Tables']['markers']['Row'];
 interface MarkerContextType {
   markers: Marker[];
   isAddingMarker: boolean;
+  isUploading: boolean;
   setIsAddingMarker: (value: boolean) => void;
+  clearAllMarkers: () => Promise<void>;
   addMarker: (params: {
     latitude: number;
     longitude: number;
@@ -45,8 +47,42 @@ interface MarkerProviderProps {
 export const MarkerProvider = ({ children }: MarkerProviderProps) => {
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [isAddingMarker, setIsAddingMarker] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Function to calculate distance between two points in miles
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number => {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  const clearAllMarkers = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.rpc('clear_all_markers_rpc');
+      if (error) throw error;
+      await fetchMarkers(); // Refresh markers after clearing
+      Alert.alert('Success', 'All markers have been cleared');
+    } catch (err) {
+      console.error('Error clearing markers:', err);
+      Alert.alert('Error', 'Failed to clear markers');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchMarkers();
@@ -70,24 +106,58 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
 
   const uploadImage = async (uri: string): Promise<string | null> => {
     try {
+      setIsUploading(true);
       const response = await fetch(uri);
-      const blob = await response.blob();
-      const filename = `marker-${Date.now()}.jpg`;
+      const arrayBuffer = await response.arrayBuffer();
       
-      const { data, error } = await supabase.storage
-        .from('marker-images')
-        .upload(filename, blob);
+      if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+        console.error('Image data is empty');
+        throw new Error('Image data is empty');
+      }
+      
+      // Get content type from response headers
+      const contentType = response.headers.get('content-type') || 'image/jpeg';
+      const ext = contentType.split('/')[1].replace('jpeg', 'jpg');
+      
+      // Create a unique filename
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(2, 15);
+      const filename = `marker-${timestamp}-${random}.${ext}`;
 
-      if (error) throw error;
+      console.log('Uploading image:', {
+        filename,
+        contentType,
+        size: arrayBuffer.byteLength
+      });
+
+      const { data, error } = await supabase.storage
+        .from('pin-markers')
+        .upload(filename, arrayBuffer, {
+          contentType: contentType,
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Storage upload error:', error);
+        throw error;
+      }
+
+      console.log('Upload successful:', data);
 
       const { data: { publicUrl } } = supabase.storage
-        .from('marker-images')
+        .from('pin-markers')
         .getPublicUrl(filename);
 
       return publicUrl;
     } catch (err) {
-      console.error('Error uploading image:', err);
+      console.error('Image upload error:', err);
+      Alert.alert(
+        'Error',
+        'Failed to upload image. Please ensure the image is less than 5MB and in a supported format (JPEG, PNG, GIF, HEIC/HEIF).'
+      );
       return null;
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -109,7 +179,7 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
       if (imageUri) {
         imageUrl = await uploadImage(imageUri);
       }
-
+      
       const { data, error } = await supabase
         .from('markers')
         .insert([{
@@ -125,9 +195,7 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
 
       if (error) throw error;
 
-      // Fetch all markers to ensure we have the latest data
       await fetchMarkers();
-      
       Alert.alert('Success', `${category.toUpperCase()} marker added successfully`);
     } catch (err) {
       console.error('Error adding marker:', err);
@@ -162,7 +230,6 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
 
       if (error) throw error;
 
-      // Refresh markers after confirmation
       await fetchMarkers();
       Alert.alert('Success', 'Marker status updated successfully');
     } catch (err) {
@@ -178,6 +245,8 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
       value={{
         markers,
         isAddingMarker,
+        isUploading,
+        clearAllMarkers,
         setIsAddingMarker,
         addMarker,
         refreshMarkers: fetchMarkers,

@@ -130,6 +130,7 @@ export const es = {
   search: 'Buscar',
   university: 'Universidad',
   addMark: 'Agregar Marca',
+  location: 'Ubicación',
   refresh: 'Actualizar',
   
   // Pin Type Modal
