@@ -9,6 +9,9 @@ module.exports = {
   ...defaultConfig,
   resolver: {
     ...defaultConfig.resolver,
+    alias: {
+      '@': path.resolve(__dirname),
+    },
     extraNodeModules: {
       // Polyfills for Node.js core modules
       events: require.resolve('events/'),

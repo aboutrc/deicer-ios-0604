@@ -1,28 +1,68 @@
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
 import { Globe, Map as MapIcon, CreditCard, Shield, MessageSquare, Info } from 'lucide-react-native';
 import { useRouter, usePathname } from 'expo-router';
+import { useLanguage, type LanguageCode } from '@/context/LanguageContext';
+
+const languageFlags = {
+  en: require('@/assets/images/us-flag.png'),
+  es: require('@/assets/images/mx-flag.png'),
+  zh: require('@/assets/images/cn-flag.png'),
+  hi: require('@/assets/images/in-flag.png'),
+  ar: require('@/assets/images/sa-flag.png'),
+};
+
+const languageLabels = {
+  en: 'EN',
+  es: 'ES',
+  zh: 'ZH',
+  hi: 'HI',
+  ar: 'AR',
+};
 
 export default function PersistentHeader() {
   const router = useRouter();
   const pathname = usePathname();
+  const { language, setLanguage, t } = useLanguage();
+
+  const cycleLanguage = () => {
+    const languages = ['en', 'es', 'zh', 'hi', 'ar'];
+    const currentIndex = languages.indexOf(language);
+    const nextIndex = (currentIndex + 1) % languages.length;
+    setLanguage(languages[nextIndex]);
+  };
 
   const isActive = (path: string) => pathname === path;
 
   const navigationItems = [
-    { icon: MapIcon, label: 'Map', path: '/(tabs)/' },
-    { icon: CreditCard, label: 'Card', path: '/(tabs)/card' },
-    { icon: Shield, label: 'Protect', path: '/(tabs)/protect' },
-    { icon: MessageSquare, label: 'Chat', path: '/(tabs)/chat2' },
-    { icon: Info, label: 'Info', path: '/(tabs)/info' }
+    { icon: MapIcon, label: t('map'), path: '/(tabs)/' },
+    { icon: CreditCard, label: t('card'), path: '/(tabs)/card' },
+    { icon: Shield, label: t('protect'), path: '/(tabs)/protect' },
+    { icon: MessageSquare, label: t('chat'), path: '/(tabs)/chat2' },
+    { icon: Info, label: t('info'), path: '/(tabs)/info' }
   ];
 
   return (
     <View style={styles.headerContainer}>
       <View style={styles.topHeader}>
-        <Text style={styles.logo}>DEICER</Text>
-        <TouchableOpacity style={styles.languageToggle}>
-          <Globe size={20} color="#FFFFFF" />
-          <Text style={styles.languageText}>EN</Text>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('@/assets/images/deicer-badge-sm.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.logo}>DEICER</Text>
+        </View>
+        <TouchableOpacity 
+          style={styles.languageToggle}
+          onPress={cycleLanguage}
+        >
+          <Image 
+            source={languageFlags[language]} 
+            style={styles.flagIcon} 
+          />
+          <Text style={styles.languageText}>
+            {languageLabels[language]}
+          </Text>
         </TouchableOpacity>
       </View>
       
@@ -66,6 +106,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#333333',
   },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logoImage: {
+    width: 30,
+    height: 30,
+    marginRight: 8,
+  },
   logo: {
     color: '#FFFFFF',
     fontSize: 30,
@@ -75,16 +124,21 @@ const styles = StyleSheet.create({
   languageToggle: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: '#2C2C2E',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
+  },
+  flagIcon: {
+    width: 24,
+    height: 16,
+    marginRight: 8,
+    borderRadius: 2,
   },
   languageText: {
     color: '#FFFFFF',
     fontSize: 14,
     fontFamily: 'Inter-Medium',
-    marginLeft: 6,
   },
   navigation: {
     flexDirection: 'row',

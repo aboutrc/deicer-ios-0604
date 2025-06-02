@@ -88,6 +88,8 @@ export const en = {
   
   // Rights Screen
   knowYourRights: 'Know Your Rights',
+  knowYourRightsCard: 'Know Your Rights Card',
+  quickAccessToRights: 'Quick access to your rights',
   rightsIntroduction: 'Understanding your rights during interactions with immigration enforcement can help protect you and your community. Here\'s what you need to know:',
   rightToRefuse: 'Right to Refuse Entry',
   rightToRefuseContent: 'Immigration officers cannot enter your home without a valid judicial warrant signed by a judge. You have the right to refuse entry if they do not have one.',
@@ -124,6 +126,35 @@ export const en = {
   mapLoadError: 'Map could not be loaded',
   tapOnMapToAddMark: 'Tap anywhere on the map to add a mark',
 
+  // Map Controls
+  search: 'Search',
+  university: 'University',
+  addMark: 'Add Mark',
+  refresh: 'Refresh',
+  
+  // Pin Type Modal
+  selectPinType: 'Select Pin Type',
+  changeImage: 'Change Image',
+  addImage: 'Add Image',
+  ice: 'ICE',
+  observer: 'Observer',
+  selectPinTypeDesc: 'Select the type of pin to add to the map',
+
+  // Audio Button Titles
+  recordingNotification: 'Recording Notification',
+  constitutionalRights: 'Constitutional Rights',
+  noPermissionToSearch: 'No Permission to Search',
+  requestBadgeNumbers: 'Request Badge Numbers',
+  freeToGo: 'Free to Go?',
+  goodbye: 'Thank you. Goodbye.',
+
+  // Audio Button Descriptions
+  recordingNotificationDesc: 'This conversation is being recorded for my documentation should I need it. I choose to exercise my 5th Amendment rights under the United States Constitution',
+  constitutionalRightsDesc: 'I do not wish to speak with you, answer your questions, or sign or hand you any documents based on my 5th Amendment rights under the United States Constitution.',
+  noPermissionToSearchDesc: 'I do not give you permission to search any of my belongings based on my 4th Amendment rights.',
+  requestBadgeNumbersDesc: 'I would request badge numbers from all officers present.',
+  freeToGoDesc: 'Am I free to go? Yes or No.',
+  goodbyeDesc: 'Thank you. I have documented this for my evidence. Have a good day Officer.',
   // Protect Screen
   liveTranslation: 'Live Translation',
   liveTranslationDesc: 'Speak in English and get instant Spanish translation',
@@ -131,6 +162,9 @@ export const en = {
   stopListening: 'Stop Listening',
   englishText: 'English Text',
   spanishText: 'Spanish Text',
+  chineseText: 'Chinese Text',
+  hindiText: 'Hindi Text', 
+  arabicText: 'Arabic Text',
   preRecordedResponses: 'Pre-Recorded Audio Responses',
   preRecordedDesc: 'Place your phone near the door to listen and translate English to your language',
   featureNotAvailable: 'This feature is only available on web browsers',

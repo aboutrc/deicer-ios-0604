@@ -9,8 +9,10 @@ import {
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import { 
   Play, 
-  Square
+  Square,
+  Volume2
 } from 'lucide-react-native';
+import { useLanguage } from '@/context/LanguageContext';
 
 // Static mapping of audio assets
 const audioAssets = {
@@ -30,38 +32,39 @@ interface AudioButton {
 
 const audioButtons: AudioButton[] = [
   {
-    title: 'Recording Notification',
-    description: 'This conversation is being recorded for my documentation should I need it. I choose to exercise my 5th Amendment rights under the United States Constitution',
+    title: 'recordingNotification',
+    description: 'recordingNotificationDesc',
     file: 'recording-notification'
   },
   {
-    title: 'Constitutional Rights',
-    description: 'I do not wish to speak with you, answer your questions, or sign or hand you any documents based on my 5th Amendment rights under the United States Constitution.',
+    title: 'constitutionalRights',
+    description: 'constitutionalRightsDesc',
     file: 'constitutional-rights'
   },
   {
-    title: 'No Permission to Search',
-    description: 'I do not give you permission to search any of my belongings based on my 4th Amendment rights.',
+    title: 'noPermissionToSearch',
+    description: 'noPermissionToSearchDesc',
     file: 'no-search-permission'
   },
   {
-    title: 'Request Badge Numbers',
-    description: 'I would request badge numbers from all officers present.',
+    title: 'requestBadgeNumbers',
+    description: 'requestBadgeNumbersDesc',
     file: 'badge-numbers'
   },
   {
-    title: 'Free to Go?',
-    description: 'Am I free to go? Yes or No.',
+    title: 'freeToGo',
+    description: 'freeToGoDesc',
     file: 'free-to-go'
   },
   {
-    title: 'Thank you. Goodbye.',
-    description: 'Thank you. I have documented this for my evidence. Have a good day Officer.',
+    title: 'goodbye',
+    description: 'goodbyeDesc',
     file: 'goodbye'
   }
 ];
 
 export default function CardScreen() {
+  const { t } = useLanguage();
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
 
@@ -126,16 +129,16 @@ export default function CardScreen() {
       contentContainerStyle={styles.contentContainer}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Know Your Rights Card</Text>
-        <Text style={styles.subtitle}>Quick access to your rights</Text>
+        <Text style={styles.title}>{t('knowYourRightsCard')}</Text>
+        <Text style={styles.subtitle}>{t('quickAccessToRights')}</Text>
       </View>
 
       <View style={styles.audioButtonsContainer}>
         {audioButtons.map((button, index) => (
           <View key={index} style={styles.audioButton}>
             <View style={styles.audioInfo}>
-              <Text style={styles.audioTitle}>{button.title}</Text>
-              <Text style={styles.audioDescription}>{button.description}</Text>
+              <Text style={styles.audioTitle}>{t(button.title)}</Text>
+              <Text style={styles.audioDescription}>{t(button.description)}</Text>
             </View>
             <TouchableOpacity
               style={styles.playButton}

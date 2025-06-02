@@ -16,10 +16,53 @@ import {
 import { WebView } from 'react-native-webview';
 import { useConversation } from '@elevenlabs/react';
 import { Send, Mic, MicOff, Volume2, TriangleAlert as AlertTriangle } from 'lucide-react-native';
+import { useLanguage } from '@/context/LanguageContext';
+
+// Hardcoded translations for each language
+const translations = {
+  ar: {
+    welcomeMessage: 'تيا لوبي هي مساعدة ذكاء اصطناعي مدربة على معلومات من LULAC و ACLU. يمكنها الإجابة على أسئلة حول حقوقك وعمليات الهجرة والحماية القانونية في الولايات المتحدة.',
+    commonQuestions: [
+      'ما هي حقوقي إذا جاء ICE إلى بابي؟',
+      'هل يجب علي إظهار الهوية للشرطة؟',
+      'ما هو الفرق بين أمر التفتيش وأمر ICE؟',
+      'ماذا يجب أن أفعل إذا تم احتجازي؟'
+    ]
+  },
+  zh: {
+    welcomeMessage: '露佩阿姨是一位人工智能助手，她接受了来自 LULAC 和 ACLU 的信息培训。她可以回答关于您的权利、移民程序和在美国的法律保护等问题。',
+    commonQuestions: [
+      '如果移民局来敲我的门，我有什么权利？',
+      '我必须向警察出示身份证明吗？',
+      '法院搜查令和移民局命令有什么区别？',
+      '如果我被拘留了该怎么办？'
+    ]
+  },
+  hi: {
+    welcomeMessage: 'टिया लूप एक AI सहायक है जिसे LULAC और ACLU की जानकारी पर प्रशिक्षित किया गया है। वह आपके अधिकारों, आव्रजन प्रक्रियाओं और संयुक्त राज्य अमेरिका में कानूनी सुरक्षा के बारे में प्रश्नों का उत्तर दे सकती है।',
+    commonQuestions: [
+      'अगर ICE मेरे दरवाजे पर आता है तो मेरे क्या अधिकार हैं?',
+      'क्या मुझे पुलिस को पहचान पत्र दिखाना होगा?',
+      'वारंट और ICE आदेश के बीच क्या अंतर है?',
+      'अगर मुझे हिरासत में लिया जाता है तो मुझे क्या करना चाहिए?'
+    ]
+  },
+  es: {
+    welcomeMessage: 'Tía Lupe es una asistente de IA entrenada con información de LULAC y la ACLU. Puede responder preguntas sobre tus derechos, procesos migratorios y protecciones legales en los Estados Unidos.',
+    commonQuestions: [
+      '¿Cuáles son mis derechos si ICE viene a mi puerta?',
+      '¿Tengo que mostrar identificación a la policía?',
+      '¿Cuál es la diferencia entre una orden judicial y una orden de ICE?',
+      '¿Qué debo hacer si soy detenido?'
+    ]
+  }
+};
 
 export default function Chat2Screen() {
+  const { language } = useLanguage();
+
   if (Platform.OS !== 'web') {
-    const webAppUrl = 'https://deicer.org/mob';
+    const webAppUrl = `https://deicer.org/mob?lang=${language}`;
     
     return (
       <View style={styles.container}>
@@ -61,7 +104,13 @@ export default function Chat2Screen() {
   const [autoStartAttempted, setAutoStartAttempted] = useState(false);
   const [transcription, setTranscription] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const { t, currentAgent } = useLanguage();
+  const scrollViewRef = useRef(null);
+
+  // Get the correct translations based on language
+  const getTranslation = () => {
+    return translations[language] || translations.es;
+  };
 
   const {
     startSession,
@@ -74,7 +123,7 @@ export default function Chat2Screen() {
     error: conversationError,
     transcript,
   } = useConversation({
-    agentId: 'nPjA5PlVWxRd7L1Ypou4',
+    agentId: currentAgent.id,
     onConnect: () => {
       console.log('Connected');
     },
@@ -169,7 +218,7 @@ export default function Chat2Screen() {
     >
       <View style={styles.imageContainer}>
         <Image
-          source={require('@/assets/images/tia_lupe_w.jpg')}
+          source={currentAgent.image}
           style={[
             styles.agentImage,
             isSpeaking && styles.agentImageSpeaking
@@ -221,8 +270,23 @@ export default function Chat2Screen() {
         {Array.isArray(messages) && messages.length === 0 && !isConnected && !isStarting && (
           <View style={styles.welcomeContainer}>
             <Text style={styles.welcomeText}>
-              Welcome! I'm Tía Lupe, your AI assistant for immigration and legal information.
+              {getTranslation().welcomeMessage}
             </Text>
+            <View style={styles.commonQuestions}>
+              {getTranslation().commonQuestions.map((question, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.questionButton}
+                  onPress={() => {
+                    if (isConnected) {
+                      sendUserMessage(question);
+                    }
+                  }}
+                >
+                  <Text style={styles.questionText}>{question}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         )}
         
@@ -411,7 +475,23 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'Inter-Regular',
-    textAlign: 'center',
+    textAlign: 'left',
+    marginBottom: 16,
+    lineHeight: 24,
+  },
+  commonQuestions: {
+    marginTop: 16,
+  },
+  questionButton: {
+    backgroundColor: '#2C2C2E',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  questionText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
   },
   loadingContainer: {
     padding: 24,

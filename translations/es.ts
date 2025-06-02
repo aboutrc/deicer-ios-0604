@@ -88,6 +88,8 @@ export const es = {
   
   // Rights Screen
   knowYourRights: 'Conozca Sus Derechos',
+  knowYourRightsCard: 'Tarjeta de Conozca Sus Derechos',
+  quickAccessToRights: 'Acceso rápido a sus derechos',
   rightsIntroduction: 'Entender sus derechos durante las interacciones con las autoridades de inmigración puede ayudar a protegerlo a usted y a su comunidad. Esto es lo que necesita saber:',
   rightToRefuse: 'Derecho a Rechazar la Entrada',
   rightToRefuseContent: 'Los oficiales de inmigración no pueden ingresar a su hogar sin una orden judicial válida firmada por un juez. Tiene derecho a rechazar la entrada si no tienen una.',
@@ -124,6 +126,36 @@ export const es = {
   mapLoadError: 'No se pudo cargar el mapa',
   tapOnMapToAddMark: 'Toca en cualquier lugar del mapa para agregar una marca',
 
+  // Map Controls
+  search: 'Buscar',
+  university: 'Universidad',
+  addMark: 'Agregar Marca',
+  refresh: 'Actualizar',
+  
+  // Pin Type Modal
+  selectPinType: 'Seleccionar Tipo de Marca',
+  changeImage: 'Cambiar Imagen',
+  addImage: 'Agregar Imagen',
+  ice: 'ICE',
+  observer: 'Observador',
+  selectPinTypeDesc: 'Seleccione el tipo de marca para agregar al mapa',
+
+  // Audio Button Titles
+  recordingNotification: 'Notificación de Grabación',
+  constitutionalRights: 'Derechos Constitucionales',
+  noPermissionToSearch: 'Sin Permiso para Buscar',
+  requestBadgeNumbers: 'Solicitar Números de Placa',
+  freeToGo: '¿Libre para Irme?',
+  goodbye: 'Gracias. Adiós.',
+
+  // Audio Button Descriptions
+  recordingNotificationDesc: 'Esta conversación está siendo grabada para mi documentación si la necesito. Elijo ejercer mis derechos de la Quinta Enmienda bajo la Constitución de los Estados Unidos',
+  constitutionalRightsDesc: 'No deseo hablar con usted, responder sus preguntas, ni firmar o entregarle documentos, según mis derechos de la Quinta Enmienda bajo la Constitución de los Estados Unidos.',
+  noPermissionToSearchDesc: 'No le doy permiso para registrar ninguna de mis pertenencias según mis derechos de la Cuarta Enmienda.',
+  requestBadgeNumbersDesc: 'Solicito los números de placa de todos los oficiales presentes.',
+  freeToGoDesc: '¿Estoy libre para irme? Sí o No.',
+  goodbyeDesc: 'Gracias. He documentado esto como evidencia. Que tenga un buen día, Oficial.',
+
   // Protect Screen
   liveTranslation: 'Traducción en Vivo',
   liveTranslationDesc: 'Habla en inglés y obtén una traducción instantánea al español',
@@ -131,6 +163,9 @@ export const es = {
   stopListening: 'Dejar de Escuchar',
   englishText: 'Texto en Inglés',
   spanishText: 'Texto en Español',
+  chineseText: 'Texto en Chino',
+  hindiText: 'Texto en Hindi',
+  arabicText: 'Texto en Árabe',
   preRecordedResponses: 'Respuestas de Audio Pregrabadas',
   preRecordedDesc: 'Coloca tu teléfono cerca de la puerta para escuchar y traducir del inglés a tu idioma',
   featureNotAvailable: 'Esta función solo está disponible en navegadores web',
@@ -152,5 +187,5 @@ export const es = {
   identifyAuthorityDesc: '¿Puede identificarse por favor? ¿Es usted de la policía local o de Inmigración y Control de Aduanas?',
   
   requestBadgeNumbers: 'Solicitar Números de Placa',
-  requestBadgeNumbersDesc: 'Solicito los números de placa de todos los oficiales presentes.',
+  requestBadgeNumbersDesc: 'Solicito los números de placa de todos los oficiales presentes.'
 };

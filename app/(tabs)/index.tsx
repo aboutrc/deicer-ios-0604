@@ -4,7 +4,7 @@ import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
 import MapView, { Marker as RNMarker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MapPin, CircleAlert as AlertCircle, Loader as Loader2, Camera, Eye, Shield, Search, Plus, RotateCw, Clock, X, GraduationCap, Bug } from 'lucide-react-native';
+import { MapPin, CircleAlert as AlertCircle, Loader as Loader2, Camera, Eye, Shield, Search, Plus, RotateCw, Clock, X, GraduationCap, Trash2 } from 'lucide-react-native';
 import { useLanguage } from '@/context/LanguageContext';
 import SearchLocationModal from '@/components/SearchLocationModal';
 import { useMarkers } from '@/context/MarkerContext';
@@ -18,14 +18,13 @@ export default function MapScreen() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showPinTypeModal, setShowPinTypeModal] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{latitude: number, longitude: number} | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
   const [showUniversitiesModal, setShowUniversitiesModal] = useState(false);
   const [showSearchLocationModal, setShowSearchLocationModal] = useState(false);
-  const [showTestResults, setShowTestResults] = useState(false);
-  const [testResults, setTestResults] = useState<any[]>([]);
   const mapRef = useRef<any>(null);
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -105,33 +104,40 @@ export default function MapScreen() {
     const region: Region = {
       latitude: coordinates.latitude,
       longitude: coordinates.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
+      latitudeDelta: 0.02,
+      longitudeDelta: 0.02,
     };
 
-    mapRef.current.animateToRegion(region, 1000);
+    mapRef.current.animateToRegion(region, 1500);
     setShowUniversitiesModal(false);
     setShowSearchLocationModal(false);
   };
 
-  const runExpirationTest = async () => {
-    try {
-      // Reset test environment (cleans up old markers and creates new ones)
-      await supabase.rpc('reset_test_environment');
-      
-      // Wait 2 seconds for the trigger to process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Verify results
-      const { data, error } = await supabase.rpc('verify_expired_markers');
-      
-      if (error) throw error;
-      setTestResults(data);
-      setShowTestResults(true);
-    } catch (err) {
-      console.error('Error running expiration test:', err);
-      Alert.alert('Error', 'Failed to run expiration test');
-    }
+  const handleClearMarkers = async () => {
+    Alert.alert(
+      'Clear All Markers',
+      'Are you sure you want to delete all markers? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear All',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setClearing(true);
+              await supabase.rpc('clear_all_markers_rpc');
+              await refreshMarkers();
+              Alert.alert('Success', 'All markers have been cleared');
+            } catch (err) {
+              console.error('Error clearing markers:', err);
+              Alert.alert('Error', 'Failed to clear markers');
+            } finally {
+              setClearing(false);
+            }
+          }
+        }
+      ]
+    );
   };
 
   const renderPinTypeModal = () => {
@@ -147,12 +153,12 @@ export default function MapScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Pin Type</Text>
+              <Text style={styles.modalTitle}>{t('selectPinType')}</Text>
               <TouchableOpacity
                 onPress={() => setShowPinTypeModal(false)}
                 style={styles.cancelButton}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>{t('cancel')}</Text>
               </TouchableOpacity>
             </View>
 
@@ -162,7 +168,7 @@ export default function MapScreen() {
             >
               <Camera size={24} color="#007AFF" />
               <Text style={styles.imageButtonText}>
-                {selectedImage ? 'Change Image' : 'Add Image'}
+                {selectedImage ? t('changeImage') : t('addImage')}
               </Text>
             </TouchableOpacity>
 
@@ -180,7 +186,7 @@ export default function MapScreen() {
                 onPress={() => handleAddMarker('ice')}
               >
                 <Shield size={24} color="#FFFFFF" />
-                <Text style={styles.pinTypeText}>ICE</Text>
+                <Text style={styles.pinTypeText}>{t('ice')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -188,12 +194,12 @@ export default function MapScreen() {
                 onPress={() => handleAddMarker('observer')}
               >
                 <Eye size={24} color="#FFFFFF" />
-                <Text style={styles.pinTypeText}>Observer</Text>
+                <Text style={styles.pinTypeText}>{t('observer')}</Text>
               </TouchableOpacity>
             </View>
 
             <Text style={styles.pinTypeNote}>
-              Select the type of pin to add to the map
+              {t('selectPinTypeDesc')}
             </Text>
           </View>
         </View>
@@ -400,38 +406,41 @@ export default function MapScreen() {
               onPress={() => setShowSearchLocationModal(true)}
             >
               <Search size={24} color="#FFFFFF" />
-              <Text style={styles.mapControlText}>Search</Text>
+              <Text style={styles.mapControlText}>{t('search')}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.mapControlButton}
               onPress={() => setShowUniversitiesModal(true)}
             >
               <GraduationCap size={24} color="#FFFFFF" />
-              <Text style={styles.mapControlText}>University</Text>
+              <Text style={styles.mapControlText}>{t('university')}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.mapControlButton}
               onPress={() => setIsAddingMarker(true)}
             >
               <Plus size={24} color="#FFFFFF" />
-              <Text style={styles.mapControlText}>Add Mark</Text>
+              <Text style={styles.mapControlText}>{t('addMark')}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.mapControlButton}
               onPress={handleRefresh}
-              disabled={refreshing}>
+              disabled={refreshing}
+            >
               <RotateCw 
                 size={24} 
                 color="#FFFFFF"
                 style={refreshing ? styles.rotating : undefined}
               />
-              <Text style={styles.mapControlText}>Refresh</Text>
+              <Text style={styles.mapControlText}>{t('refresh')}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.mapControlButton}
-              onPress={runExpirationTest}>
-              <Bug size={24} color="#FFFFFF" />
-              <Text style={styles.mapControlText}>Test</Text>
+              onPress={handleClearMarkers}
+              disabled={clearing || markersLoading}
+            >
+              <Trash2 size={24} color="#FFFFFF" />
+              <Text style={styles.mapControlText}>Clear</Text>
             </TouchableOpacity>
           </View>
           {renderPinTypeModal()}
@@ -449,43 +458,6 @@ export default function MapScreen() {
           {isAddingMarker && (
             <View style={styles.addMarkIndicator}>
               <Text style={styles.addMarkText}>{t('tapOnMapToAddMark')}</Text>
-            </View>
-          )}
-          {showTestResults && (
-            <View style={styles.testResults}>
-              <View style={styles.testResultsHeader}>
-                <Text style={styles.testResultsTitle}>Expiration Test Results</Text>
-                <TouchableOpacity 
-                  onPress={() => setShowTestResults(false)}
-                  style={styles.closeButton}>
-                  <X size={24} color="#FFFFFF" />
-                </TouchableOpacity>
-              </View>
-              <ScrollView style={styles.testResultsList}>
-                {testResults.map((result, index) => (
-                  <View key={index} style={styles.testResultItem}>
-                    <Text style={styles.testResultTitle}>{result.title}</Text>
-                    <Text style={styles.testResultDetail}>
-                      Created: {new Date(result.created_at).toLocaleString()}
-                    </Text>
-                    <Text style={styles.testResultDetail}>
-                      Expires: {new Date(result.expiration_time).toLocaleString()}
-                    </Text>
-                    <View style={[
-                      styles.testResultStatus,
-                      result.should_be_expired === result.is_expired 
-                        ? styles.testResultSuccess 
-                        : styles.testResultFailure
-                    ]}>
-                      <Text style={styles.testResultStatusText}>
-                        {result.should_be_expired === result.is_expired 
-                          ? '✓ Working correctly' 
-                          : '✗ Not working as expected'}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
             </View>
           )}
         </>
@@ -798,65 +770,5 @@ const styles = StyleSheet.create({
   },
   rotating: {
     transform: [{ rotate: '360deg' }],
-  },
-  testResults: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -150 }, { translateY: -200 }],
-    width: 300,
-    maxHeight: 400,
-    backgroundColor: '#1C1C1E',
-    borderRadius: 12,
-    padding: 16,
-  },
-  testResultsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  testResultsTitle: {
-    fontSize: 18,
-    fontFamily: 'Inter-SemiBold',
-    color: '#FFFFFF',
-  },
-  testResultsList: {
-    flex: 1,
-  },
-  testResultItem: {
-    backgroundColor: '#2C2C2E',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
-  },
-  testResultTitle: {
-    fontSize: 14,
-    fontFamily: 'Inter-Medium',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  testResultDetail: {
-    fontSize: 12,
-    fontFamily: 'Inter-Regular',
-    color: '#8E8E93',
-    marginBottom: 2,
-  },
-  testResultStatus: {
-    marginTop: 8,
-    padding: 8,
-    borderRadius: 4,
-  },
-  testResultSuccess: {
-    backgroundColor: '#1C7D3D',
-  },
-  testResultFailure: {
-    backgroundColor: '#881337',
-  },
-  testResultStatusText: {
-    fontSize: 12,
-    fontFamily: 'Inter-Medium',
-    color: '#FFFFFF',
-    textAlign: 'center',
   },
 });
