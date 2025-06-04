@@ -1,22 +1,33 @@
 {
   "expo": {
-    "name": "bolt-expo-nativewind",
-    "slug": "bolt-expo-nativewind",
+    "name": "DEICER",
+    "slug": "DEICER",
+    "owner": "aboutrc",
+    "projectId": "be205279-baa0-431e-8c0b-8af518b6ebee",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "icon": "./assets/images/icons/icon.png",
+    "scheme": "DEICER",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/icons/ios-splash-icon-light.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.deicer.app",
+      "bundleIdentifier": "com.deicer.mobile",
+      "icon": "./assets/images/icons/ios-light.png",
       "config": {
         "googleMapsApiKey": "YOUR_IOS_GOOGLE_MAPS_API_KEY"
       }
     },
     "android": {
-      "package": "com.deicer.app",
+      "package": "com.deicer.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icons/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
       "config": {
         "googleMaps": {
           "apiKey": "YOUR_ANDROID_GOOGLE_MAPS_API_KEY"
@@ -41,6 +52,22 @@
     },
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "googleTranslateApiKey": "EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY",
+      "openaiApiKey": "EXPO_PUBLIC_OPENAI_API_KEY",
+      "eas": {
+        "projectId": "be205279-baa0-431e-8c0b-8af518b6ebee"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "cli": {
+      "version": ">= 5.9.1",
+      "appVersionSource": "remote"
+    }
   }
 }
