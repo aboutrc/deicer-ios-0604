@@ -90,13 +90,26 @@ export default function InfoScreen() {
 
     // Process content to handle HTML while preserving formatting
     const processContent = (content: string) => {
-      return content
+      // Extract all image URLs from the content
+      const imgRegex = /<img[^>]+src="([^">]+)"/g;
+      const images = [];
+      let match;
+      while ((match = imgRegex.exec(content)) !== null) {
+        images.push(match[1]);
+      }
+
+      // Remove all HTML tags except line breaks and paragraphs
+      const textContent = content
         .replace(/<p>/g, '\n')
-        .replace(/<\/p>/g, '')
-        .replace(/<a\s+href="([^"]+)"[^>]*>(.*?)<\/a>/g, '[$2]($1)')
+        .replace(/<\/p>/g, '\n')
+        .replace(/<br\s*\/?>/g, '\n')
         .replace(/<[^>]+>/g, '')
         .trim();
+
+      return { textContent, images };
     };
+
+    const { textContent, images } = processContent(card.content);
 
     return (
       <View key={card.id} style={styles.card}>
@@ -114,8 +127,29 @@ export default function InfoScreen() {
 
         {isExpanded && (
           <View style={styles.cardContent}>
+            {card.image_url && (
+              <View style={styles.imageContainer}>
+                <Image
+                  source={{ uri: card.image_url }}
+                  style={styles.featuredImage}
+                  resizeMode="cover"
+                />
+              </View>
+            )}
+
             {card.video_url && renderVideoEmbed(card.video_url)}
             
+            {/* Display extracted images */}
+            {images.map((imageUrl, index) => (
+              <View key={index} style={styles.imageContainer}>
+                <Image
+                  source={{ uri: imageUrl }}
+                  style={styles.contentImage}
+                  resizeMode="cover"
+                />
+              </View>
+            ))}
+
             <Markdown
               style={{
                 body: styles.markdownBody,
@@ -133,18 +167,8 @@ export default function InfoScreen() {
                 return false;
               }}
             >
-              {processContent(card.content)}
+              {textContent}
             </Markdown>
-
-            {card.image_url && (
-              <View style={styles.imageContainer}>
-                <Image
-                  source={{ uri: card.image_url }}
-                  style={styles.image}
-                  resizeMode="cover"
-                />
-              </View>
-            )}
           </View>
         )}
       </View>
@@ -323,13 +347,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   imageContainer: {
-    marginTop: 16,
+    marginVertical: 8,
     borderRadius: 8,
     overflow: 'hidden',
+    backgroundColor: '#2C2C2E',
   },
-  image: {
+  featuredImage: {
     width: '100%',
     height: 200,
+    backgroundColor: '#2C2C2E',
+  },
+  contentImage: {
+    width: '100%',
+    height: undefined,
+    aspectRatio: 16/9,
+    backgroundColor: '#2C2C2E',
   },
   errorContainer: {
     padding: 24,

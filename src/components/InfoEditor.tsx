@@ -16,37 +16,41 @@ interface Session {
   } | null;
 }
 
-interface BlogPost {
+interface InfoCard {
   id: string;
-  title: Record<string, string>;
-  content: Record<string, string>;
-  published_at: string | null;
-  author_id: string | null;
-  order: number;
+  title: string;
+  content: string;
+  video_url?: string;
+  image_url?: string;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
 }
 
 const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
   const [session, setSession] = useState<Session | null>(null);
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [cards, setCards] = useState<InfoCard[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
-  const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
+  const [editingCard, setEditingCard] = useState<InfoCard | null>(null);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [newPost, setNewPost] = useState(false);
+  const [newCard, setNewCard] = useState(false);
   const [currentTitle, setCurrentTitle] = useState('');
   const [currentContent, setCurrentContent] = useState('');
+  const [currentImageUrl, setCurrentImageUrl] = useState('');
+  const [currentVideoUrl, setCurrentVideoUrl] = useState('');
   const [reordering, setReordering] = useState(false);
   const [translating, setTranslating] = useState(false);
 
-  const fetchPosts = async () => {
+  const fetchCards = async () => {
     try {
-      console.log('Fetching posts...');
+      console.log('Fetching info cards...');
       const { data, error: fetchError } = await supabase
-        .from('blog_posts')
+        .from('info_cards')
         .select('*')
-        .order('order', { ascending: true })
-        .order('created_at', { ascending: true });
+        .order('order_index', { ascending: true });
 
       console.log('Fetch response:', { data, error: fetchError });
 
@@ -55,10 +59,10 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
         throw fetchError;
       }
 
-      setPosts(data || []);
+      setCards(data || []);
     } catch (err) {
-      console.error('Error fetching posts:', err);
-      setError('Failed to load posts');
+      console.error('Error fetching cards:', err);
+      setError('Failed to load cards');
     } finally {
       setLoading(false);
     }
@@ -77,7 +81,7 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
       setSession(session);
     });
 
-    fetchPosts();
+    fetchCards();
 
     return () => subscription.unsubscribe();
   }, []);
@@ -87,63 +91,69 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
     return <Auth language={language} />;
   }
 
-  const togglePost = (postId: string) => {
-    setExpandedPosts(prev => {
+  const toggleCard = (cardId: string) => {
+    setExpandedCards(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(postId)) {
-        newSet.delete(postId);
+      if (newSet.has(cardId)) {
+        newSet.delete(cardId);
       } else {
-        newSet.add(postId);
+        newSet.add(cardId);
       }
       return newSet;
     });
   };
 
-  const startEditing = async (post: BlogPost) => {
+  const startEditing = async (card: InfoCard) => {
     try {
-      // Verify the post still exists before editing
-      const { data: existingPost, error: checkError } = await supabase
-        .from('blog_posts')
+      // Verify the card still exists before editing
+      const { data: existingCard, error: checkError } = await supabase
+        .from('info_cards')
         .select('*')
-        .eq('id', post.id)
+        .eq('id', card.id)
         .single();
 
       if (checkError) {
         throw checkError;
       }
 
-      if (!existingPost) {
-        console.error('Post no longer exists:', post.id);
-        setError('This post no longer exists. It may have been deleted.');
-        // Remove the non-existent post from the local state
-        setPosts(currentPosts => currentPosts.filter(p => p.id !== post.id));
+      if (!existingCard) {
+        console.error('Card no longer exists:', card.id);
+        setError('This card no longer exists. It may have been deleted.');
+        // Remove the non-existent card from the local state
+        setCards(currentCards => currentCards.filter(c => c.id !== card.id));
         return;
       }
 
-      setEditingPost(existingPost);
-      setCurrentTitle(existingPost.title[language] || existingPost.title['en'] || '');
-      setCurrentContent(existingPost.content[language] || existingPost.content['en'] || '');
-      setNewPost(false);
+      setEditingCard(existingCard);
+      setCurrentTitle(existingCard.title);
+      setCurrentContent(existingCard.content);
+      setCurrentImageUrl(existingCard.image_url || '');
+      setCurrentVideoUrl(existingCard.video_url || '');
+      setNewCard(false);
       setError(null);
     } catch (err) {
       console.error('Error starting edit:', err);
-      setError('Failed to load post for editing');
+      setError('Failed to load card for editing');
     }
   };
 
-  const startNewPost = () => {
-    setNewPost(true);
-    setEditingPost(null);
+  const startNewCard = () => {
+    setNewCard(true);
+    setEditingCard(null);
     setCurrentTitle('');
     setCurrentContent('');
+    setCurrentImageUrl('');
+    setCurrentVideoUrl('');
     setError(null);
   };
 
   const cancelEditing = () => {
-    setEditingPost(null);
-    setNewPost(false);
+    setEditingCard(null);
+    setNewCard(false);
     setCurrentTitle('');
     setCurrentContent('');
+    setCurrentImageUrl('');
+    setCurrentVideoUrl('');
   };
 
   const validatePost = () => {
@@ -171,112 +181,80 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
       setSaving(true);
       setError(null);
 
-      // Validate session and user ID
       if (!session?.user?.id) {
         console.error('Authentication error: No user session');
         throw new Error('User not authenticated');
       }
 
-      // Validate post data
       const content = validatePost();
 
-      // Create translations for all languages
-      const languages = ['en', 'es', 'zh', 'hi', 'ar'];
-      const updatedTitle = languages.reduce((acc, lang) => ({
-        ...acc, 
-        [lang]: currentTitle 
-      }), {});
-      const updatedContent = languages.reduce((acc, lang) => ({
-        ...acc,
-        [lang]: currentContent
-      }), {});
-
-      if (editingPost) {
-        // First check if the post exists and get its current data
-        const { data: existingPost, error: checkError } = await supabase
-          .from('blog_posts')
+      if (editingCard) {
+        const { data: existingCard, error: checkError } = await supabase
+          .from('info_cards')
           .select('*')
-          .eq('id', editingPost.id)
+          .eq('id', editingCard.id)
           .single();
 
         if (checkError) {
-          console.error('Error checking post existence:', checkError);
-          throw new Error('Failed to verify post existence');
+          console.error('Error checking card existence:', checkError);
+          throw new Error('Failed to verify card existence');
         }
 
-        if (!existingPost) {
-          throw new Error('This post no longer exists. It may have been deleted.');
+        if (!existingCard) {
+          throw new Error('This card no longer exists');
         }
 
-        // Verify user has permission to edit this post
-        if (existingPost.author_id && existingPost.author_id !== session.user.id) {
-          console.error('Permission denied:', { 
-            postAuthorId: existingPost.author_id, 
-            currentUserId: session.user.id 
-          });
-          throw new Error('You do not have permission to edit this post');
-        }
-
-        // Update existing post
-        const { data: updatedPost, error: updateError } = await supabase
-          .from('blog_posts')
+        const { data: updatedCard, error: updateError } = await supabase
+          .from('info_cards')
           .update({
-            title: updatedTitle,
-            content: updatedContent,
+            title: currentTitle,
+            content: currentContent,
+            image_url: currentImageUrl,
+            video_url: currentVideoUrl,
             updated_at: new Date().toISOString()
           })
-          .eq('id', editingPost.id)
+          .eq('id', editingCard.id)
           .select()
           .single();
 
-        if (updateError || !updatedPost) {
+        if (updateError || !updatedCard) {
           console.error('Update error:', updateError);
-          throw new Error(`Failed to update post: ${updateError.message}`);
+          throw new Error(`Failed to update card: ${updateError?.message}`);
         }
 
-        // Update local state with the updated post
-        setPosts(currentPosts => 
-          currentPosts.map(p => 
-            p.id === editingPost.id ? updatedPost : p
+        setCards(currentCards => 
+          currentCards.map(c => 
+            c.id === editingCard.id ? updatedCard : c
           )
         );
 
         cancelEditing();
-
       } else {
-        // Get the highest order value
-        const maxOrder = Math.max(...posts.map(p => p.order ?? 0), -1);
-
-        const newPostData = {
-          title: updatedTitle,
-          content: updatedContent,
-          published_at: new Date().toISOString(),
-          order: maxOrder + 1,
-          author_id: session.user.id
-        };
-
-        const { data: insertData, error: saveError } = await supabase
-          .from('blog_posts')
-          .insert(newPostData)
+        // Create new card
+        const { data: newCard, error: createError } = await supabase
+          .from('info_cards')
+          .insert({
+            title: currentTitle,
+            content: currentContent,
+            image_url: currentImageUrl,
+            video_url: currentVideoUrl,
+            order_index: cards.length,
+            is_active: true
+          })
           .select()
           .single();
 
-        if (saveError) {
-          console.error('Insert error:', saveError);
-          throw new Error(`Failed to create post: ${saveError.message}`);
+        if (createError || !newCard) {
+          console.error('Create error:', createError);
+          throw new Error(`Failed to create card: ${createError?.message}`);
         }
 
-        if (!insertData) {
-          console.error('No data returned from insert');
-          throw new Error('Failed to create post - database operation failed');
-        }
-
-        await fetchPosts();
+        setCards(currentCards => [...currentCards, newCard]);
         cancelEditing();
       }
     } catch (err) {
-      console.error('Error saving post:', err);
-      setError(err instanceof Error ? err.message : 'Failed to save post. Please try again.');
+      console.error('Save error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save card');
     } finally {
       setSaving(false);
     }
@@ -287,11 +265,11 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
       setTranslating(true);
       setError(null);
       
-      // Get all posts that need translation
-      const postsToTranslate = posts.map(post => ({
-        id: post.id,
-        title: post.title,
-        content: post.content
+      // Get all cards that need translation
+      const cardsToTranslate = cards.map(card => ({
+        id: card.id,
+        title: card.title,
+        content: card.content
       }));
 
       // Call the translation function
@@ -301,7 +279,7 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ posts: postsToTranslate })
+        body: JSON.stringify({ posts: cardsToTranslate })
       });
 
       if (!response.ok) {
@@ -309,45 +287,45 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
         throw new Error(error.message || 'Translation failed');
       }
 
-      // Refresh posts after translation
-      await fetchPosts();
+      // Refresh cards after translation
+      await fetchCards();
       setTranslating(false);
       setError(null);
     } catch (err) {
-      console.error('Error translating posts:', err);
-      setError(err instanceof Error ? err.message : 'Failed to translate posts');
+      console.error('Error translating cards:', err);
+      setError(err instanceof Error ? err.message : 'Failed to translate cards');
       setTranslating(false);
     }
   };
 
-  const handleDelete = async (postId: string) => {
+  const handleDelete = async (cardId: string) => {
     try {
       setError(null);
       
       // Confirm before deleting
-      if (!window.confirm('Are you sure you want to delete this post?')) {
+      if (!window.confirm('Are you sure you want to delete this card?')) {
         return;
       }
       
       const { error: deleteError } = await supabase
-        .from('blog_posts')
+        .from('info_cards')
         .delete()
-        .eq('id', postId);
+        .eq('id', cardId);
 
       if (deleteError) throw deleteError;
       
-      // Remove from expanded posts set
-      setExpandedPosts(prev => {
+      // Remove from expanded cards set
+      setExpandedCards(prev => {
         const newSet = new Set(prev);
-        newSet.delete(postId);
+        newSet.delete(cardId);
         return newSet;
       });
       
       // Update local state without refetching
-      setPosts(currentPosts => currentPosts.filter(p => p.id !== postId));
+      setCards(currentCards => currentCards.filter(c => c.id !== cardId));
     } catch (err) {
-      console.error('Error deleting post:', err);
-      setError(err instanceof Error ? err.message : 'Failed to delete post');
+      console.error('Error deleting card:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete card');
     }
   };
 
@@ -357,34 +335,34 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
     setError(null);
 
     try {
-      const items = Array.from(posts);
+      const items = Array.from(cards);
       const [reorderedItem] = items.splice(result.source.index, 1);
       items.splice(result.destination.index, 0, reorderedItem);
 
       // First update local state for immediate feedback
-      const updatedPosts = items.map((post, index) => ({
-        ...post,
-        order: index 
+      const updatedCards = items.map((card, index) => ({
+        ...card,
+        order_index: index 
       }));
-      setPosts(updatedPosts);
+      setCards(updatedCards);
 
       // Then update the database
       const { error } = await supabase
-        .from('blog_posts')
+        .from('info_cards')
         .upsert(
-          updatedPosts.map(post => ({
-            id: post.id,
-            order: post.order,
+          updatedCards.map(card => ({
+            id: card.id,
+            order_index: card.order_index,
             updated_at: new Date().toISOString()
           }))
         );
 
       if (error) throw error;
     } catch (err) {
-      console.error('Error updating post order:', err);
-      setError('Failed to update post order');
+      console.error('Error updating card order:', err);
+      setError('Failed to update card order');
       // Revert to original order on error
-      await fetchPosts();
+      await fetchCards();
     }
   };
 
@@ -392,14 +370,14 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
     <div className={`min-h-screen bg-gray-900 p-8 ${language === 'ar' ? 'rtl' : 'ltr'}`}>
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-white">Post Editor</h1>
+          <h1 className="text-2xl font-bold text-white">Card Editor</h1>
           <div className="flex items-center gap-4">
             <button
-              onClick={startNewPost}
+              onClick={startNewCard}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
             >
               <Plus size={20} />
-              <span>New Post</span>
+              <span>New Card</span>
             </button>
             <button
               onClick={handleTranslate}
@@ -417,7 +395,7 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
               }`}
             >
               <GripVertical size={20} />
-              <span>{reordering ? 'Done Reordering' : 'Reorder Posts'}</span>
+              <span>{reordering ? 'Done Reordering' : 'Reorder Cards'}</span>
             </button>
             <button
               onClick={() => supabase.auth.signOut()}
@@ -434,14 +412,14 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
           </div>
         )}
           
-        {(editingPost || newPost) && (
+        {(editingCard || newCard) && (
           <div className="bg-gray-800 rounded-lg p-6 mb-8">
             <div className="space-y-4">
               <input
                 type="text"
                 value={currentTitle}
                 onChange={(e) => setCurrentTitle(e.target.value)}
-                placeholder="Post title..."
+                placeholder="Card title..."
                 className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 maxLength={200}
               />
@@ -484,9 +462,9 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
                         const file = blobInfo.blob();
                         const fileName = `${Date.now()}-${blobInfo.filename()}`;
                         
-                        // Upload to public directory
+                        // Upload to info-card-images bucket
                         const { data, error } = await supabase.storage
-                          .from('blog-images')
+                          .from('info-card-images')
                           .upload(fileName, file, {
                             cacheControl: '3600',
                             upsert: false
@@ -496,7 +474,7 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
                         
                         // Get public URL
                         const { data: { publicUrl } } = supabase.storage
-                          .from('blog-images')
+                          .from('info-card-images')
                           .getPublicUrl(fileName);
                         
                         return publicUrl;
@@ -536,20 +514,20 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
         )}
 
         {loading ? (
-          <div className="text-gray-400 text-center">Loading posts...</div>
-        ) : !editingPost && !newPost && (
+          <div className="text-gray-400 text-center">Loading cards...</div>
+        ) : !editingCard && !newCard && (
           <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="posts">
+            <Droppable droppableId="cards">
               {(provided) => (
                 <div 
                   {...provided.droppableProps}
                   ref={provided.innerRef}
                   className="space-y-4"
                 >
-                  {posts.map((post, index) => (
+                  {cards.map((card, index) => (
                     <Draggable
-                      key={post.id}
-                      draggableId={post.id}
+                      key={card.id}
+                      draggableId={card.id}
                       index={index}
                       isDragDisabled={!reordering}
                     >
@@ -572,13 +550,13 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
                                 </div>
                               )}
                               <button
-                                onClick={() => togglePost(post.id)}
+                                onClick={() => toggleCard(card.id)}
                                 className="flex-1 flex items-center justify-between text-white hover:text-gray-300"
                               >
                                 <h2 className="text-xl font-semibold">
-                                  {post.title?.[language] || post.title?.['en'] || ''}
+                                  {card.title}
                                 </h2>
-                                {expandedPosts.has(post.id) ? (
+                                {expandedCards.has(card.id) ? (
                                   <ChevronDown size={20} />
                                 ) : (
                                   <ChevronRight size={20} />
@@ -587,33 +565,33 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
                             </div>
                             <div className="flex items-center gap-2 ml-4">
                               <button
-                                onClick={() => startEditing(post)}
+                                onClick={() => startEditing(card)}
                                 className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg"
                               >
                                 
                                 <Pencil size={20} />
                               </button>
                               <button
-                                onClick={() => handleDelete(post.id)}
+                                onClick={() => handleDelete(card.id)}
                                 className="p-2 text-gray-400 hover:text-red-500 hover:bg-gray-700 rounded-lg"
-                                aria-label="Delete post"
+                                aria-label="Delete card"
                               >
                                 <Trash2 size={20} />
                               </button>
                             </div>
                           </div>
 
-                          {expandedPosts.has(post.id) && (
+                          {expandedCards.has(card.id) && (
                             <div className="px-6 pb-6">
                               <div 
                                 className="text-gray-300 prose prose-invert max-w-none"
                                 dangerouslySetInnerHTML={{ 
-                                  __html: (post.content?.[language] || post.content?.['en'] || '').toString()
+                                  __html: card.content
                                 }}
                               />
-                              {post.published_at && (
+                              {card.created_at && (
                                 <div className="mt-4 text-gray-500 text-sm">
-                                  Published: {new Date(post.published_at).toLocaleDateString()}
+                                  Created: {new Date(card.created_at).toLocaleDateString()}
                                 </div>
                               )}
                             </div>
