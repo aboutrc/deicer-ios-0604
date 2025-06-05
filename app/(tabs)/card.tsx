@@ -6,7 +6,7 @@ import {
   TouchableOpacity, 
   ScrollView
 } from 'react-native';
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
+import { Audio } from 'expo-av';
 import { 
   Play, 
   Square,
@@ -86,8 +86,8 @@ export default function CardScreen() {
         playsInSilentModeIOS: true,
         staysActiveInBackground: true,
         allowsRecordingIOS: false,
-        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false
       });
 
       const audioAsset = audioAssets[fileId as keyof typeof audioAssets];

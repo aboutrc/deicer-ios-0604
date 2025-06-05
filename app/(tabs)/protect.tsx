@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Alert, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { Mic, MicOff, Volume2, Square, Play } from 'lucide-react-native';
-import { Audio } from 'expo-av';
+import { Audio, AVPlaybackStatus } from 'expo-av';
 import { useLanguage } from '@/context/LanguageContext';
 
+// Define language type
+type SupportedLanguage = 'ar' | 'zh' | 'hi' | 'en' | 'es';
+
+// Define translations type
+type TranslationType = {
+  [key: string]: string;
+};
+
 // Hardcoded translations for each language
-const translations = {
+const translations: Record<SupportedLanguage, TranslationType> = {
   ar: {
     liveTranslation: 'الترجمة الفورية',
     liveTranslationDesc: 'تحدث بالإنجليزية واحصل على ترجمة فورية للعربية',
@@ -65,6 +73,46 @@ const translations = {
     identifyAuthorityDesc: 'क्या आप कृपया अपनी पहचान बता सकते हैं। क्या आप स्थानीय कानून प्रवर्तन के साथ हैं या आव्रजन और सीमा शुल्क प्रवर्तन के साथ हैं।',
     requestBadgeNumbers: 'बैज नंबर',
     requestBadgeNumbersDesc: 'मैं उपस्थित सभी अधिकारियों से बैज नंबर का अनुरोध करूंगा।'
+  },
+  en: {
+    liveTranslation: 'Live Translation',
+    liveTranslationDesc: 'Speak in English and get instant translation',
+    startListening: 'Start Listening',
+    stopListening: 'Stop Listening',
+    preRecordedResponses: 'Pre-recorded Audio Responses',
+    preRecordedDesc: 'Place your phone near the door to listen and translate English.',
+    fifthAmendmentRights: 'Fifth Amendment Rights',
+    fifthAmendmentDesc: 'I do not wish to speak with you, answer your questions, or sign or hand you any documents based on my Fifth Amendment rights under the U.S. Constitution.',
+    fourthAmendmentRights: 'Fourth Amendment Rights',
+    fourthAmendmentDesc: 'I do not give you permission to enter my home, based on my Fourth Amendment rights under the U.S. Constitution, unless you have a warrant to enter, signed by a judge or magistrate, with my name on it, that you slide under the door.',
+    warrantRequest: 'Warrant Request',
+    warrantRequestDesc: 'Please slide the warrant to enter - signed by a judge or magistrate with my name - under the door. If you do not have one, I do not wish to speak with you, answer your questions, or sign or hand you any documents based on my Fifth Amendment rights under the U.S. Constitution.',
+    searchPermission: 'Search Permission',
+    searchPermissionDesc: 'I do not give you permission to search any of my property based on my Fourth Amendment rights.',
+    identifyAuthority: 'Identify Authority',
+    identifyAuthorityDesc: 'Could you please identify yourself. Are you with local law enforcement or with Immigration and Customs Enforcement.',
+    requestBadgeNumbers: 'Badge Numbers',
+    requestBadgeNumbersDesc: 'I request badge numbers from all officers present.'
+  },
+  es: {
+    liveTranslation: 'Traducción en Vivo',
+    liveTranslationDesc: 'Habla en inglés y obtén traducción instantánea al español',
+    startListening: 'Comenzar a Escuchar',
+    stopListening: 'Dejar de Escuchar',
+    preRecordedResponses: 'Respuestas de Audio Pregrabadas',
+    preRecordedDesc: 'Coloca tu teléfono cerca de la puerta para escuchar y traducir inglés.',
+    fifthAmendmentRights: 'Derechos de la Quinta Enmienda',
+    fifthAmendmentDesc: 'No deseo hablar con usted, responder a sus preguntas, ni firmar o entregarle documentos basándome en mis derechos de la Quinta Enmienda bajo la Constitución de los EE.UU.',
+    fourthAmendmentRights: 'Derechos de la Cuarta Enmienda',
+    fourthAmendmentDesc: 'No le doy permiso para entrar a mi casa, basándome en mis derechos de la Cuarta Enmienda bajo la Constitución de los EE.UU., a menos que tenga una orden judicial para entrar, firmada por un juez o magistrado, con mi nombre, que deslice bajo la puerta.',
+    warrantRequest: 'Solicitud de Orden Judicial',
+    warrantRequestDesc: 'Por favor, deslice la orden judicial para entrar - firmada por un juez o magistrado con mi nombre - bajo la puerta. Si no tiene una, no deseo hablar con usted, responder a sus preguntas, ni firmar o entregarle documentos basándome en mis derechos de la Quinta Enmienda bajo la Constitución de los EE.UU.',
+    searchPermission: 'Permiso de Búsqueda',
+    searchPermissionDesc: 'No le doy permiso para registrar ninguna de mis propiedades basándome en mis derechos de la Cuarta Enmienda.',
+    identifyAuthority: 'Identificar Autoridad',
+    identifyAuthorityDesc: '¿Podría identificarse por favor? ¿Está con la policía local o con Inmigración y Control de Aduanas?',
+    requestBadgeNumbers: 'Números de Placa',
+    requestBadgeNumbersDesc: 'Solicito números de placa de todos los oficiales presentes.'
   }
 };
 
@@ -149,13 +197,7 @@ export default function ProtectScreen() {
 
   // Get target language for translation
   const getTargetLanguage = () => {
-    switch (language) {
-      case 'zh': return t('chineseText');
-      case 'hi': return t('hindiText');
-      case 'ar': return t('arabicText');
-      case 'es': return t('spanishText');
-      default: return t('englishText');
-    }
+    return 'es'; // Always return Spanish as target language
   };
 
   useEffect(() => {
@@ -179,8 +221,8 @@ export default function ProtectScreen() {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
-        interruptionModeIOS: Audio.InterruptionModeIOS.DoNotMix,
-        interruptionModeAndroid: Audio.InterruptionModeAndroid.DoNotMix,
+        staysActiveInBackground: true,
+        shouldDuckAndroid: true,
       });
 
       const { recording: newRecording } = await Audio.Recording.createAsync(
@@ -210,27 +252,50 @@ export default function ProtectScreen() {
         throw new Error('No recording URI available');
       }
 
-      // Here you would typically send the audio file to a speech-to-text service
-      // For now, we'll simulate the process with a timeout
-      setTimeout(() => {
-        const simulatedText = "This is a simulated transcription of the recorded audio.";
-        setTranscription(simulatedText);
-        translateText(simulatedText)
-          .then(translatedText => {
-            setTranslation(translatedText);
-            setIsTranslating(false);
-          })
-          .catch(err => {
-            setError('Translation failed');
-            setIsTranslating(false);
-          });
-      }, 2000);
+      // Create form data with the audio file
+      const formData = new FormData();
+      formData.append('file', {
+        uri: uri,
+        type: 'audio/m4a',
+        name: 'recording.m4a'
+      } as any); // Type assertion needed for React Native FormData
+      formData.append('model', 'whisper-1');
+      formData.append('language', 'en');
 
-    } catch (err) {
-      setError('Failed to stop recording');
+      // Send to Whisper API
+      const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.EXPO_PUBLIC_OPENAI_API_KEY}`,
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error?.message || 'Transcription failed');
+      }
+
+      const transcribedText = data.text;
+      setTranscription(transcribedText);
+
+      // Translate the transcribed text
+      translateText(transcribedText)
+        .then(translatedText => {
+          setTranslation(translatedText);
+          setIsTranslating(false);
+        })
+        .catch(err => {
+          setError('Translation failed');
+          setIsTranslating(false);
+        });
+
+    } catch (err: any) { // Type assertion for error handling
+      setError('Failed to process audio: ' + (err.message || String(err)));
       setIsListening(false);
       setIsTranslating(false);
-      console.error('Failed to stop recording:', err);
+      console.error('Failed to process audio:', err);
     }
   };
 
@@ -246,7 +311,7 @@ export default function ProtectScreen() {
           body: JSON.stringify({
             q: text,
             source: 'en',
-            target: getTargetLanguage(language),
+            target: getTargetLanguage(),
             format: 'text',
           }),
         }
@@ -267,19 +332,25 @@ export default function ProtectScreen() {
         await sound.unloadAsync();
       }
 
-      const { sound: newSound } = await Audio.Sound.createAsync(audioAssets[audioId]);
+      const source = audioAssets[audioId as keyof typeof audioAssets];
+      const { sound: newSound } = await Audio.Sound.createAsync(source);
       setSound(newSound);
       setCurrentlyPlayingId(buttonId);
-      
-      await newSound.playAsync();
-      newSound.setOnPlaybackStatusUpdate(status => {
-        if (status.didJustFinish) {
+
+      newSound.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
+        if (!status.isLoaded) return;
+        if (status.isPlaying === false && status.positionMillis === status.durationMillis) {
           setCurrentlyPlayingId(null);
+          setIsPlaying(false);
         }
       });
-    } catch (error) {
-      console.error('Error playing audio:', error);
+
+      await newSound.playAsync();
+      setIsPlaying(true);
+    } catch (err) {
+      console.error('Failed to play audio:', err);
       setCurrentlyPlayingId(null);
+      setIsPlaying(false);
     }
   };
 
