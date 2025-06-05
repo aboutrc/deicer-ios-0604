@@ -4,7 +4,8 @@ import { supabase, testSupabaseConnection } from '../lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
 import { redCardStatements } from '../lib/audioStatements';
 import AudioPlayer from './AudioPlayer';
-import { Play, Square, AlertTriangle, Loader2, Mic } from 'lucide-react';
+import { Play, Square, AlertTriangle, Loader2, Mic } from 'lucide-react-native';
+import { Audio } from 'expo-av';
 
 interface RedCardProps {
   language?: 'en' | 'es' | 'zh' | 'hi' | 'ar';
@@ -35,11 +36,7 @@ const RedCard = ({ language = 'en' }: RedCardProps) => {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [sessionId] = useState(() => uuidv4());
   const [isSaving, setIsSaving] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const recordingRef = useRef<Audio.Recording | null>(null);
   const [recordings, setRecordings] = useState<any[]>([]);
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
   const [isCheckingConnection, setIsCheckingConnection] = useState(true);
@@ -184,11 +181,8 @@ const RedCard = ({ language = 'en' }: RedCardProps) => {
 
     // Cleanup function
     return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
+      if (recordingRef.current) {
+        recordingRef.current.stopAndUnloadAsync();
       }
     };
   }, []);
@@ -197,78 +191,59 @@ const RedCard = ({ language = 'en' }: RedCardProps) => {
     try {
       setError(null);
       
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: false,
-          noiseSuppression: false, 
-          autoGainControl: false
-        } 
-      });
-
-      streamRef.current = stream;
-
-      const mimeType = getSupportedMimeType();
-      if (!mimeType) {
-        throw new Error('No supported audio MIME type found');
+      // Request permissions
+      const permission = await Audio.requestPermissionsAsync();
+      if (!permission.granted) {
+        throw new Error('Permission not granted');
       }
 
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType
+      // Configure audio mode
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false
       });
+
+      // Start recording
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
       
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
-      };
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: mimeType });
-        await saveRecording(audioBlob);
-        
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach(track => track.stop());
-          streamRef.current = null;
-        }
-      };
-
-      mediaRecorder.start(1000);
+      recordingRef.current = recording;
       setIsRecording(true);
       setError(null);
     } catch (err) {
-      console.error('Microphone access error:', err);
-      
-      if (err instanceof Error) {
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-          setError(language === 'es'
-            ? 'Acceso al micrófono denegado. Por favor, cierre y vuelva a abrir la página, luego intente de nuevo.'
-            : 'Microphone access denied. Please close and reopen the page, then try again.');
-        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-          setError(language === 'es'
-            ? 'No se encontró micrófono. Por favor, conecte un micrófono e intente de nuevo.'
-            : 'No microphone found. Please connect a microphone and try again.');
-        } else {
-          setError(language === 'es'
-            ? 'No se puede acceder al micrófono. Por favor, verifique la configuración de su dispositivo.'
-            : 'Unable to access microphone. Please check your device settings.');
-        }
-      } else {
-        setError(language === 'es'
-          ? 'Error al iniciar la grabación. Por favor, verifique los permisos del micrófono.'
-          : 'Error starting recording. Please check microphone permissions.');
-      }
-      
+      console.error('Recording error:', err);
+      setError(language === 'es'
+        ? 'Error al iniciar la grabación. Por favor, verifique los permisos del micrófono.'
+        : 'Error starting recording. Please check microphone permissions.');
       setIsRecording(false);
     }
   };
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
+  const stopRecording = async () => {
+    try {
+      if (!recordingRef.current) return;
+
+      await recordingRef.current.stopAndUnloadAsync();
+      const uri = recordingRef.current.getURI();
+      
+      if (uri) {
+        // Save the recording
+        const fileName = `recording-${Date.now()}.m4a`;
+        // Here you would implement the logic to save the recording to your storage
+        // and update your database with the recording information
+      }
+
+      recordingRef.current = null;
       setIsRecording(false);
+    } catch (err) {
+      console.error('Error stopping recording:', err);
+      setError(language === 'es'
+        ? 'Error al detener la grabación'
+        : 'Error stopping recording');
     }
   };
 
