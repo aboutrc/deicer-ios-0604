@@ -1,0 +1,14 @@
+# Files to ignore in Cursor AI operations
+# Note: This file overrides default Cursor ignore patterns
+
+# Allow .env file modifications
+!.env
+!.env.example
+
+# Still ignore sensitive files
+*.key
+*.pem
+*.p12
+*.jks
+*.keystore
+*.mobileprovision

@@ -2,7 +2,28 @@ import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/supabase';
 
-const supabaseUrl = 'https://dqklgrcelslhpvnemlze.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxa2xncmNlbHNsaHB2bmVtbHplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2Njg5OTAsImV4cCI6MjA2NDI0NDk5MH0.47Z4WIrk-TV8tPLhw6WxYGCPY_EAbXphFAuIbJcoEds';
+// Get environment variables
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey);
+// Validate environment variables
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables. Please check your .env file and ensure both EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY are set.');
+}
+
+// Create Supabase client with storage-only configuration and additional security options
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'deicer-ios-app'
+    }
+  },
+  db: {
+    schema: 'public'
+  }
+});

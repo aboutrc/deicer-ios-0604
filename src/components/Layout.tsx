@@ -37,28 +37,8 @@ const Layout: React.FC<LayoutProps> = ({ children, language, onLanguageChange, o
   const location = useLocation();
   const navigate = useNavigate();
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAddingMarker, setIsAddingMarker] = useState(false);
   
-  React.useEffect(() => {
-    // Check if user is logged in
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsLoggedIn(!!session);
-    };
-    
-    checkAuth();
-    
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsLoggedIn(!!session);
-    });
-    
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
   const handleLanguageToggle = () => {
     // Find current language index
     const currentIndex = languageOrder.indexOf(language);

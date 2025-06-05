@@ -3,9 +3,18 @@ import * as TaskManager from 'expo-task-manager';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import { supabase } from '@/lib/supabase';
+import { AndroidNotificationPriority } from 'expo-notifications';
+import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BACKGROUND_FETCH_TASK = 'background-location-task';
 const LOCATION_TASK = 'background-location';
+const LOCATION_TASK_NAME = 'background-location';
+const NOTIFICATION_INTERVAL_KEY = 'notification_interval_minutes';
+const DEFAULT_INTERVAL = 20; // Default 20 minutes in milliseconds
+
+// Note: While background updates occur every 20 minutes, users are encouraged to use
+// the refresh button in the map module for real-time updates of nearby activity.
 
 // Configure notifications
 Notifications.setNotificationHandler({
@@ -13,6 +22,9 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+    priority: AndroidNotificationPriority.HIGH
   }),
 });
 
@@ -33,8 +45,8 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
       for (const marker of markers) {
         await Notifications.scheduleNotificationAsync({
           content: {
-            title: 'ICE Activity Reported Nearby',
-            body: `ICE activity reported ${marker.distance.toFixed(1)} miles from your location`,
+            title: 'Community Safety Alert',
+            body: `Activity reported ${marker.distance.toFixed(1)} miles from your location. Tap for details.`,
             data: { markerId: marker.marker_id },
           },
           trigger: null, // Send immediately
@@ -86,48 +98,87 @@ TaskManager.defineTask(LOCATION_TASK, async ({ data, error }) => {
   }
 });
 
-export async function startBackgroundServices() {
+export const startBackgroundServices = async (intervalMinutes?: number) => {
   try {
-    // Request permissions
-    const { status: locationStatus } = await Location.requestBackgroundPermissionsAsync();
-    const { status: notificationStatus } = await Notifications.requestPermissionsAsync();
-
-    if (locationStatus !== 'granted' || notificationStatus !== 'granted') {
-      throw new Error('Required permissions not granted');
+    const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+    if (foregroundStatus !== 'granted') {
+      Alert.alert('Permission required', 'Please enable location services to use this feature.');
+      return;
     }
 
-    // Register background fetch
-    await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-      minimumInterval: 900, // 15 minutes
-      stopOnTerminate: false,
-      startOnBoot: true,
-    });
+    const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+    if (backgroundStatus !== 'granted') {
+      Alert.alert('Permission required', 'Please enable background location to use this feature.');
+      return;
+    }
 
-    // Start background location updates
-    await Location.startLocationUpdatesAsync(LOCATION_TASK, {
+    // Save the interval if provided
+    if (intervalMinutes) {
+      await AsyncStorage.setItem(NOTIFICATION_INTERVAL_KEY, intervalMinutes.toString());
+    }
+
+    // Get the saved interval or use default
+    const savedInterval = await AsyncStorage.getItem(NOTIFICATION_INTERVAL_KEY);
+    const interval = savedInterval ? parseInt(savedInterval, 10) : DEFAULT_INTERVAL;
+
+    await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
       accuracy: Location.Accuracy.Balanced,
-      timeInterval: 900000, // 15 minutes
-      distanceInterval: 100, // 100 meters
+      timeInterval: interval * 60 * 1000, // Convert minutes to milliseconds
+      deferredUpdatesInterval: interval * 60 * 1000, // Same as timeInterval
+      deferredUpdatesDistance: 100, // Minimum distance in meters
       foregroundService: {
-        notificationTitle: 'Background Location',
-        notificationBody: 'Monitoring for nearby ICE activity',
+        notificationTitle: "DEICER is active",
+        notificationBody: "Monitoring for nearby activity",
       },
+      showsBackgroundLocationIndicator: true,
+      activityType: Location.ActivityType.AutomotiveNavigation,
     });
-
-    return true;
   } catch (error) {
-    console.error('Failed to start background services:', error);
-    return false;
+    console.error('Error starting background services:', error);
+    Alert.alert('Error', 'Failed to start background services. Please try again.');
   }
-}
+};
 
-export async function stopBackgroundServices() {
+export const stopBackgroundServices = async () => {
   try {
     await BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
-    await Location.stopLocationUpdatesAsync(LOCATION_TASK);
-    return true;
+    await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
   } catch (error) {
-    console.error('Failed to stop background services:', error);
-    return false;
+    console.error('Error stopping background services:', error);
   }
-}
+};
+
+TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+  if (error) {
+    console.error('Error in background task:', error);
+    return;
+  }
+
+  if (!data) {
+    return;
+  }
+
+  const { locations } = data as { locations: Location.LocationObject[] };
+  if (!locations || locations.length === 0) {
+    return;
+  }
+
+  const location = locations[0];
+  
+  try {
+    const { data: markers, error: fetchError } = await supabase
+      .rpc('get_nearby_markers', {
+        lat: location.coords.latitude,
+        long: location.coords.longitude,
+        radius_meters: 1000 // 1km radius
+      });
+
+    if (fetchError) throw fetchError;
+
+    if (markers && markers.length > 0) {
+      // Handle notifications here
+    }
+  } catch (error) {
+    console.error('Error checking for nearby markers:', error);
+  }
+});

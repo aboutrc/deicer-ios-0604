@@ -1,0 +1,27 @@
+{
+  "NSPrivacyAccessedAPITypes": [
+    {
+      "NSPrivacyAccessedAPIType": "NSLocationAlwaysAndWhenInUseUsageDescription",
+      "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+    },
+    {
+      "NSPrivacyAccessedAPIType": "NSLocationWhenInUseUsageDescription",
+      "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+    },
+    {
+      "NSPrivacyAccessedAPIType": "NSLocationUsageDescription",
+      "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+    }
+  ],
+  "NSPrivacyTracking": false,
+  "NSPrivacyTrackingDomains": [],
+  "NSPrivacyCollectedDataTypes": [
+    {
+      "NSPrivacyCollectedDataType": "Location",
+      "NSPrivacyCollectedDataTypeLinked": false,
+      "NSPrivacyCollectedDataTypeTracking": false,
+      "NSPrivacyCollectedDataTypePurposes": ["CA92.1"],
+      "NSPrivacyCollectedDataTypeVerification": "Location data is used only for real-time notifications and is never stored or shared."
+    }
+  ]
+} 

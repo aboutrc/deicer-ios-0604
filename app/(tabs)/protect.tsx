@@ -241,6 +241,11 @@ export default function ProtectScreen() {
     try {
       if (!recording) return;
 
+      const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+      if (!apiKey) {
+        throw new Error('OpenAI API key not configured');
+      }
+
       setIsListening(false);
       setIsTranslating(true);
 
@@ -258,7 +263,7 @@ export default function ProtectScreen() {
         uri: uri,
         type: 'audio/m4a',
         name: 'recording.m4a'
-      } as any); // Type assertion needed for React Native FormData
+      } as any);
       formData.append('model', 'whisper-1');
       formData.append('language', 'en');
 
@@ -266,7 +271,7 @@ export default function ProtectScreen() {
       const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.EXPO_PUBLIC_OPENAI_API_KEY}`,
+          'Authorization': `Bearer ${apiKey}`,
         },
         body: formData
       });
@@ -291,7 +296,7 @@ export default function ProtectScreen() {
           setIsTranslating(false);
         });
 
-    } catch (err: any) { // Type assertion for error handling
+    } catch (err: any) {
       setError('Failed to process audio: ' + (err.message || String(err)));
       setIsListening(false);
       setIsTranslating(false);
@@ -300,9 +305,14 @@ export default function ProtectScreen() {
   };
 
   const translateText = async (text: string): Promise<string> => {
+    const apiKey = process.env.EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY;
+    if (!apiKey) {
+      throw new Error('Google Translate API key not configured');
+    }
+
     try {
       const response = await fetch(
-        `https://translation.googleapis.com/language/translate/v2?key=${process.env.EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY || ''}`,
+        `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`,
         {
           method: 'POST',
           headers: {

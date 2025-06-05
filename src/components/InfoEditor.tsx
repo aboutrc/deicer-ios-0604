@@ -3,17 +3,9 @@ import { Editor } from '@tinymce/tinymce-react';
 import { supabase } from '../lib/supabase';
 import { ChevronDown, ChevronRight, Pencil, Plus, Save, Trash2, GripVertical, Link as LinkIcon, Image } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import Auth from './Auth';
 
 interface InfoEditorProps {
   language?: 'en' | 'es' | 'zh' | 'hi' | 'ar';
-}
-
-interface Session {
-  user: {
-    id: string;
-    email?: string;
-  } | null;
 }
 
 interface InfoCard {
@@ -29,7 +21,6 @@ interface InfoCard {
 }
 
 const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
-  const [session, setSession] = useState<Session | null>(null);
   const [cards, setCards] = useState<InfoCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingCard, setEditingCard] = useState<InfoCard | null>(null);
@@ -69,27 +60,8 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
   };
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
     fetchCards();
-
-    return () => subscription.unsubscribe();
   }, []);
-
-  // If not authenticated, show auth component
-  if (!session) {
-    return <Auth language={language} />;
-  }
 
   const toggleCard = (cardId: string) => {
     setExpandedCards(prev => {
@@ -181,29 +153,9 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
       setSaving(true);
       setError(null);
 
-      if (!session?.user?.id) {
-        console.error('Authentication error: No user session');
-        throw new Error('User not authenticated');
-      }
-
       const content = validatePost();
 
       if (editingCard) {
-        const { data: existingCard, error: checkError } = await supabase
-          .from('info_cards')
-          .select('*')
-          .eq('id', editingCard.id)
-          .single();
-
-        if (checkError) {
-          console.error('Error checking card existence:', checkError);
-          throw new Error('Failed to verify card existence');
-        }
-
-        if (!existingCard) {
-          throw new Error('This card no longer exists');
-        }
-
         const { data: updatedCard, error: updateError } = await supabase
           .from('info_cards')
           .update({
@@ -396,12 +348,6 @@ const InfoEditor: React.FC<InfoEditorProps> = ({ language = 'en' }) => {
             >
               <GripVertical size={20} />
               <span>{reordering ? 'Done Reordering' : 'Reorder Cards'}</span>
-            </button>
-            <button
-              onClick={() => supabase.auth.signOut()}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-            >
-              Sign Out
             </button>
           </div>
         </div>

@@ -18,8 +18,11 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.deicer.mobile",
       "icon": "./assets/images/icons/ios-light.png",
-      "config": {
-        "googleMapsApiKey": "YOUR_IOS_GOOGLE_MAPS_API_KEY"
+      "infoPlist": {
+        "UIBackgroundModes": ["location", "fetch"],
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "DEICER needs your location to notify you about nearby activity and allow you to report incidents in your area. Your location data is never stored or shared.",
+        "NSLocationWhenInUseUsageDescription": "DEICER uses your location to show nearby activity on the map and allow you to report incidents. Your location is only used while the app is open.",
+        "NSLocationUsageDescription": "DEICER uses your location to provide real-time information about nearby activity. Your privacy is protected as we never store or share your location data."
       }
     },
     "android": {
@@ -28,11 +31,11 @@
         "foregroundImage": "./assets/images/icons/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "config": {
-        "googleMaps": {
-          "apiKey": "YOUR_ANDROID_GOOGLE_MAPS_API_KEY"
-        }
-      }
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -40,7 +43,9 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "locationAlwaysAndWhenInUsePermission": "DEICER needs your location to notify you about nearby activity and allow you to report incidents in your area. Your location data is never stored or shared.",
+          "locationAlwaysPermission": "DEICER uses background location to send you notifications about nearby activity. Your location data is never stored or shared.",
+          "locationWhenInUsePermission": "DEICER uses your location to show nearby activity on the map and allow you to report incidents. Your location is only used while the app is open."
         }
       ]
     ],
