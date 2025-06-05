@@ -95,8 +95,10 @@ export default function CardScreen() {
         shouldPlay: true,
         volume: 1.0,
       }, (status) => {
-        if (status.isLoaded && !status.isPlaying) {
+        if (!status.isLoaded) return;
+        if (status.didJustFinish || (!status.isPlaying && status.positionMillis === status.durationMillis)) {
           setCurrentlyPlayingId(null);
+          setSound(null);
         }
       });
 
