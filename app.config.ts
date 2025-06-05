@@ -9,9 +9,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: './assets/images/icons/icon.png',
   userInterfaceStyle: 'automatic',
   splash: {
-    image: './assets/images/icons/ios-splash-icon-light.png',
+    image: './assets/images/icons/ios-splash-icon-dark.png',
     resizeMode: 'contain',
-    backgroundColor: '#ffffff'
+    backgroundColor: '#000000'
   },
   assetBundlePatterns: [
     "**/*"
