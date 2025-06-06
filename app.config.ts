@@ -8,6 +8,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: 'portrait',
   icon: './assets/images/icons/icon.png',
   userInterfaceStyle: 'automatic',
+  developmentClient: {
+    silentLaunch: false
+  },
   splash: {
     image: './assets/images/icons/ios-splash-icon-dark.png',
     resizeMode: 'contain',

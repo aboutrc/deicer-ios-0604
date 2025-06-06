@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
     
     const { data: recentMarkers, error: markersError } = await supabase
-      .from('markers')
+      .from('pin-markers')
       .select('*')
       .gte('created_at', twentyFourHoursAgo.toISOString())
       .order('created_at', { ascending: false });
@@ -55,12 +55,12 @@ Deno.serve(async (req) => {
     
     // Get active vs inactive counts
     const { data: activeCount, error: activeError } = await supabase
-      .from('markers')
+      .from('pin-markers')
       .select('count')
       .eq('active', true);
       
     const { data: inactiveCount, error: inactiveError } = await supabase
-      .from('markers')
+      .from('pin-markers')
       .select('count')
       .eq('active', false);
       

@@ -65,9 +65,9 @@ const BottomMenu: React.FC<BottomMenuProps> = ({
               <span className="text-xs">
                 {language === 'es' ? 'Añadir Marca' : 
                  language === 'zh' ? '添加标记' : 
-                 language === 'hi' ? 'मार्क जोड़ें' : 
+                 language === 'hi' ? 'मार्कर जोड़ें' : 
                  language === 'ar' ? 'إضافة علامة' : 
-                 'Add Mark'}
+                 'Add Marker'}
               </span>
             </button>
             

@@ -9,11 +9,15 @@
     "icon": "./assets/images/icons/icon.png",
     "scheme": "DEICER",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/icons/ios-splash-icon-light.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+    "developmentClient": {
+      "silentLaunch": false
     },
+    "splash": {
+      "image": "./assets/images/icons/ios-splash-icon-dark.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.deicer.mobile",
@@ -55,9 +59,6 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
     "extra": {
       "router": {},
       "googleTranslateApiKey": "EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY",

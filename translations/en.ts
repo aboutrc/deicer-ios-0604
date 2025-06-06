@@ -129,7 +129,7 @@ export const en = {
   // Map Controls
   search: 'Search',
   university: 'University',
-  addMark: 'Add Mark',
+  addMark: 'Add Marker',
   location: 'Location',
   refresh: 'Refresh',
   

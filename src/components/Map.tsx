@@ -119,7 +119,7 @@ const MapView: React.FC<MapViewProps> = ({
           
           // Upload the compressed image
           const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('marker-images')
+            .from('pin-markers-images')
             .upload(fileName, compressedImage, {
               contentType: 'image/jpeg', // Force content type to be JPEG
               cacheControl: '3600',
@@ -133,7 +133,7 @@ const MapView: React.FC<MapViewProps> = ({
           
           // Get the public URL
           const { data: { publicUrl } } = supabase.storage
-            .from('marker-images')
+            .from('pin-markers-images')
             .getPublicUrl(fileName);
             
           imageUrl = publicUrl;
@@ -146,7 +146,7 @@ const MapView: React.FC<MapViewProps> = ({
       
       // Insert marker into database
       const { data, error } = await supabase
-        .from('markers')
+        .from('pin-markers')
         .insert([
           {
             latitude: pendingMarker.lat,
@@ -175,18 +175,15 @@ const MapView: React.FC<MapViewProps> = ({
 
         setMarkers(prev => [...prev, newMarker]);
         
-        // Force a refresh to ensure all markers are up to date
-        refreshMarkers();
-        
         // Show success message
         addAlert({
-          message: `${markerCategory.toUpperCase()} marker added successfully`,
+          message: 'Thank you for adding a marker. Please make sure to refresh your screen to see any recent marker updates.',
           type: 'success',
-          duration: 3000
+          duration: 5000
         });
       }
 
-      // Reset state
+      // Reset state only on success (move outside of try/catch)
       setShowCategoryDialog(false);
       setPendingMarker(null);
       setIsAddingMarker(false);
@@ -195,7 +192,12 @@ const MapView: React.FC<MapViewProps> = ({
       setProcessingCategory(null);
     } catch (err) {
       console.error('Error adding marker:', err);
-      setError(err instanceof Error ? err.message : 'Failed to add marker');
+      addAlert({
+        message: 'Failed to add marker',
+        type: 'error',
+        duration: 5000
+      });
+      return; // Add return statement to prevent further execution
     } finally {
       setIsUploading(false);
     }
@@ -229,7 +231,7 @@ const MapView: React.FC<MapViewProps> = ({
           
           // Upload the compressed image
           const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('marker-images')
+            .from('pin-markers-images')
             .upload(fileName, compressedImage, {
               contentType: 'image/jpeg', // Force content type to be JPEG
               cacheControl: '3600',
@@ -243,7 +245,7 @@ const MapView: React.FC<MapViewProps> = ({
           
           // Get the public URL
           const { data: { publicUrl } } = supabase.storage
-            .from('marker-images')
+            .from('pin-markers-images')
             .getPublicUrl(fileName);
             
           imageUrl = publicUrl;
@@ -256,7 +258,7 @@ const MapView: React.FC<MapViewProps> = ({
       
       // Insert marker into database
       const { data, error } = await supabase
-        .from('markers')
+        .from('pin-markers')
         .insert([
           {
             latitude: pendingMarker.lat,
@@ -287,13 +289,13 @@ const MapView: React.FC<MapViewProps> = ({
         
         // Show success message
         addAlert({
-          message: `${markerCategory.toUpperCase()} marker added successfully`,
+          message: 'Thank you for adding a marker. Please make sure to refresh your screen to see any recent marker updates.',
           type: 'success',
-          duration: 3000
+          duration: 5000
         });
       }
 
-      // Reset state
+      // Reset state only on success (move outside of try/catch)
       setShowCategoryDialog(false);
       setPendingMarker(null);
       setIsAddingMarker(false);
@@ -302,7 +304,12 @@ const MapView: React.FC<MapViewProps> = ({
       setProcessingCategory(null);
     } catch (err) {
       console.error('Error adding marker:', err);
-      setError(err instanceof Error ? err.message : 'Failed to add marker');
+      addAlert({
+        message: 'Failed to add marker',
+        type: 'error',
+        duration: 5000
+      });
+      return; // Add return statement to prevent further execution
     } finally {
       setIsUploading(false);
     }

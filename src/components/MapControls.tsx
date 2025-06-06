@@ -42,14 +42,14 @@ const MapControls: React.FC<MapControlsProps> = ({
             ? 'bg-gray-700 text-white' 
             : 'bg-gray-800 text-white hover:bg-gray-700'
         }`}
-        title={isAddingMarker ? (language === 'es' ? "Cancelar" : language === 'zh' ? "取消" : language === 'hi' ? "रद्द करें" : language === 'ar' ? "إلغاء" : "Cancel") : (language === 'es' ? "Añadir Marca" : language === 'zh' ? "添加标记" : language === 'hi' ? "मार्क जोड़ें" : language === 'ar' ? "إضافة علامة" : "Add Mark")}
+        title={isAddingMarker ? (language === 'es' ? "Cancelar" : language === 'zh' ? "取消" : language === 'hi' ? "रद्द करें" : language === 'ar' ? "إلغاء" : "Cancel") : (language === 'es' ? "Añadir Marca" : language === 'zh' ? "添加标记" : language === 'hi' ? "मार्कर जोड़ें" : language === 'ar' ? "إضافة علامة" : "Add Marker")}
       >
         <Plus size={20} className="mr-2" /> 
         <span>{language === 'es' ? 'Añadir Marca' : 
                language === 'zh' ? '添加标记' : 
-               language === 'hi' ? 'मार्क जोड़ें' : 
+               language === 'hi' ? 'मार्कर जोड़ें' : 
                language === 'ar' ? 'إضافة علامة' : 
-               'Add Mark'}</span>
+               'Add Marker'}</span>
       </button>
       
       <button

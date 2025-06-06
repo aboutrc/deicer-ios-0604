@@ -116,8 +116,8 @@ const Debug: React.FC<DebugProps> = ({ language = 'en' }) => {
     
     try {
       addLog('Executing test query...');
-      const { data: markerData, error: markerError } = await supabase
-        .from('markers')
+      const { data: markers, error: markerError } = await supabase
+        .from('pin-markers')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
@@ -126,10 +126,10 @@ const Debug: React.FC<DebugProps> = ({ language = 'en' }) => {
         throw error;
       }
       if (markerError) throw markerError;
-      addLog(`Query successful. Received ${markerData?.length || 0} marker records.`);
+      addLog(`Query successful. Received ${markers?.length || 0} marker records.`);
       
-      if (markerData && markerData.length > 0) {
-        markerData.forEach(marker => {
+      if (markers && markers.length > 0) {
+        markers.forEach(marker => {
           addLog(`Marker: id=${marker.id}, category=${marker.category}, lat=${marker.latitude}, lng=${marker.longitude}, active=${marker.active}, created=${new Date(marker.created_at).toLocaleString()}`);
         });
       } else {

@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
     
     // First, get all markers
     const { data: allMarkers, error: fetchError } = await supabase
-      .from('markers')
+      .from('pin-markers')
       .select('id, category, created_at, latitude, longitude')
       .limit(1000); // Get a large batch to filter locally
     
@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
       const markerIds = markersInRadius.map(marker => marker.id);
       
       const { error: deleteError } = await supabase
-        .from('markers')
+        .from('pin-markers')
         .delete()
         .in('id', markerIds);
       

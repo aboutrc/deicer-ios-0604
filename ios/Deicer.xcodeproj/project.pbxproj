@@ -7,29 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		091AF106FA9374CF12E9436A /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324177F8EF9D1CC20EB5AEFB /* ExpoModulesProvider.swift */; };
-		1316704D2C4BB0BA4AD6120B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 38866A1BDA0DBCB737246BB0 /* PrivacyInfo.xcprivacy */; };
+		0E21F98CF810F58900DFB5C5 /* libPods-DEICER.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FCC3F7C56604376B74BC6BE9 /* libPods-DEICER.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		70EBD06B472DD713252E5F9A /* libPods-Deicer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A66D1D5B0A287E05E384DB9F /* libPods-Deicer.a */; };
+		65F6EFD4016724EF5FB76E5F /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3990A839D7D1C735A33556 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
+		FD9C7CD7D0C533618300B57E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A8D831402D56D1FCE76B7CD6 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		13B07F961A680F5B00A75B9A /* Deicer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Deicer.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Deicer/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Deicer/Info.plist; sourceTree = "<group>"; };
-		324177F8EF9D1CC20EB5AEFB /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Deicer/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		38866A1BDA0DBCB737246BB0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Deicer/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		42C94C104AB0356DC5D32C98 /* Pods-Deicer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Deicer.debug.xcconfig"; path = "Target Support Files/Pods-Deicer/Pods-Deicer.debug.xcconfig"; sourceTree = "<group>"; };
-		7549AF23A30DC72F6A8E2153 /* Pods-Deicer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Deicer.release.xcconfig"; path = "Target Support Files/Pods-Deicer/Pods-Deicer.release.xcconfig"; sourceTree = "<group>"; };
-		A66D1D5B0A287E05E384DB9F /* libPods-Deicer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Deicer.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Deicer/SplashScreen.storyboard; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* DEICER.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DEICER.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = DEICER/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = DEICER/Info.plist; sourceTree = "<group>"; };
+		270B6FC5B06A7AB3B6E90225 /* Pods-DEICER.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DEICER.debug.xcconfig"; path = "Target Support Files/Pods-DEICER/Pods-DEICER.debug.xcconfig"; sourceTree = "<group>"; };
+		2896C10C56AA15C5A83FDDBF /* Pods-DEICER.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DEICER.release.xcconfig"; path = "Target Support Files/Pods-DEICER/Pods-DEICER.release.xcconfig"; sourceTree = "<group>"; };
+		5D3990A839D7D1C735A33556 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-DEICER/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		A8D831402D56D1FCE76B7CD6 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = DEICER/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = DEICER/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Deicer/AppDelegate.swift; sourceTree = "<group>"; };
-		F11748442D0722820044C1D9 /* Deicer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Deicer-Bridging-Header.h"; path = "Deicer/Deicer-Bridging-Header.h"; sourceTree = "<group>"; };
+		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = DEICER/AppDelegate.swift; sourceTree = "<group>"; };
+		F11748442D0722820044C1D9 /* DEICER-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "DEICER-Bridging-Header.h"; path = "DEICER/DEICER-Bridging-Header.h"; sourceTree = "<group>"; };
+		FCC3F7C56604376B74BC6BE9 /* libPods-DEICER.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DEICER.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,42 +37,44 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				70EBD06B472DD713252E5F9A /* libPods-Deicer.a in Frameworks */,
+				0E21F98CF810F58900DFB5C5 /* libPods-DEICER.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		13B07FAE1A68108700A75B9A /* Deicer */ = {
+		13B07FAE1A68108700A75B9A /* DEICER */ = {
 			isa = PBXGroup;
 			children = (
 				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
-				F11748442D0722820044C1D9 /* Deicer-Bridging-Header.h */,
+				F11748442D0722820044C1D9 /* DEICER-Bridging-Header.h */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				38866A1BDA0DBCB737246BB0 /* PrivacyInfo.xcprivacy */,
+				A8D831402D56D1FCE76B7CD6 /* PrivacyInfo.xcprivacy */,
 			);
-			name = Deicer;
-			sourceTree = "<group>";
-		};
-		1F7BCF4FE25491F467E84154 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				C9063C88E13F131EB52522BF /* Deicer */,
-			);
-			name = ExpoModulesProviders;
+			name = DEICER;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				A66D1D5B0A287E05E384DB9F /* libPods-Deicer.a */,
+				FCC3F7C56604376B74BC6BE9 /* libPods-DEICER.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3B4EBA2E4F7F957E409548D3 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				270B6FC5B06A7AB3B6E90225 /* Pods-DEICER.debug.xcconfig */,
+				2896C10C56AA15C5A83FDDBF /* Pods-DEICER.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -85,12 +87,12 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				13B07FAE1A68108700A75B9A /* Deicer */,
+				13B07FAE1A68108700A75B9A /* DEICER */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				EA2E6E2FC46E782F539A7B13 /* Pods */,
-				1F7BCF4FE25491F467E84154 /* ExpoModulesProviders */,
+				3B4EBA2E4F7F957E409548D3 /* Pods */,
+				B4CFBA6E12C68EE533BECF92 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -100,9 +102,25 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* Deicer.app */,
+				13B07F961A680F5B00A75B9A /* DEICER.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A5BE3BD095649D22E8EA036D /* DEICER */ = {
+			isa = PBXGroup;
+			children = (
+				5D3990A839D7D1C735A33556 /* ExpoModulesProvider.swift */,
+			);
+			name = DEICER;
+			sourceTree = "<group>";
+		};
+		B4CFBA6E12C68EE533BECF92 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				A5BE3BD095649D22E8EA036D /* DEICER */,
+			);
+			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
@@ -111,50 +129,32 @@
 				BB2F792C24A3F905000567C9 /* Expo.plist */,
 			);
 			name = Supporting;
-			path = Deicer/Supporting;
-			sourceTree = "<group>";
-		};
-		C9063C88E13F131EB52522BF /* Deicer */ = {
-			isa = PBXGroup;
-			children = (
-				324177F8EF9D1CC20EB5AEFB /* ExpoModulesProvider.swift */,
-			);
-			name = Deicer;
-			sourceTree = "<group>";
-		};
-		EA2E6E2FC46E782F539A7B13 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				42C94C104AB0356DC5D32C98 /* Pods-Deicer.debug.xcconfig */,
-				7549AF23A30DC72F6A8E2153 /* Pods-Deicer.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
+			path = DEICER/Supporting;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		13B07F861A680F5B00A75B9A /* Deicer */ = {
+		13B07F861A680F5B00A75B9A /* DEICER */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Deicer" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "DEICER" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				135F99CCCC70101FC1F1C0CD /* [Expo] Configure project */,
+				6288D0AC03F2453409EFAEB9 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				53E3C1D403954D6533C61C58 /* [CP] Embed Pods Frameworks */,
+				20DD386AED2E907A2F1D7D83 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = Deicer;
-			productName = Deicer;
-			productReference = 13B07F961A680F5B00A75B9A /* Deicer.app */;
+			name = DEICER;
+			productName = DEICER;
+			productReference = 13B07F961A680F5B00A75B9A /* DEICER.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -170,7 +170,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Deicer" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "DEICER" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -183,7 +183,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* Deicer */,
+				13B07F861A680F5B00A75B9A /* DEICER */,
 			);
 		};
 /* End PBXProject section */
@@ -196,7 +196,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				1316704D2C4BB0BA4AD6120B /* PrivacyInfo.xcprivacy in Resources */,
+				FD9C7CD7D0C533618300B57E /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,14 +233,32 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Deicer-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-DEICER-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		135F99CCCC70101FC1F1C0CD /* [Expo] Configure project */ = {
+		20DD386AED2E907A2F1D7D83 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-DEICER/Pods-DEICER-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DEICER/Pods-DEICER-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6288D0AC03F2453409EFAEB9 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -257,25 +275,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Deicer/expo-configure-project.sh\"\n";
-		};
-		53E3C1D403954D6533C61C58 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Deicer/Pods-Deicer-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Deicer/Pods-Deicer-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-DEICER/expo-configure-project.sh\"\n";
 		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -283,7 +283,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Deicer/Pods-Deicer-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-DEICER/Pods-DEICER-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXApplication/ExpoApplication_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
@@ -292,6 +292,7 @@
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoSystemUI/ExpoSystemUI_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/RCT-Folly_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RNCAsyncStorage/RNCAsyncStorage_resources.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNSVG/RNSVGFilters.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/React-Core_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-cxxreact/React-cxxreact_privacy.bundle",
@@ -299,6 +300,7 @@
 				"${PODS_CONFIGURATION_BUILD_DIR}/expo-dev-launcher/EXDevLauncher.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/expo-dev-menu/EXDevMenu.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/glog/glog_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/react-native-maps/ReactNativeMapsPrivacy.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
@@ -310,6 +312,7 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoSystemUI_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCT-Folly_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNCAsyncStorage_resources.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNSVGFilters.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-Core_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-cxxreact_privacy.bundle",
@@ -317,10 +320,11 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXDevLauncher.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXDevMenu.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/glog_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ReactNativeMapsPrivacy.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Deicer/Pods-Deicer-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DEICER/Pods-DEICER-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -331,7 +335,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				091AF106FA9374CF12E9436A /* ExpoModulesProvider.swift in Sources */,
+				65F6EFD4016724EF5FB76E5F /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,17 +344,18 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 42C94C104AB0356DC5D32C98 /* Pods-Deicer.debug.xcconfig */;
+			baseConfigurationReference = 270B6FC5B06A7AB3B6E90225 /* Pods-DEICER.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = DEICER/DEICER.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
 				);
-				INFOPLIST_FILE = Deicer/Info.plist;
+				INFOPLIST_FILE = DEICER/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -363,23 +368,25 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = org.name.Deicer;
-				PRODUCT_NAME = Deicer;
-				SWIFT_OBJC_BRIDGING_HEADER = "Deicer/Deicer-Bridging-Header.h";
+				PRODUCT_BUNDLE_IDENTIFIER = com.deicer.mobile;
+				PRODUCT_NAME = DEICER;
+				SWIFT_OBJC_BRIDGING_HEADER = "DEICER/DEICER-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7549AF23A30DC72F6A8E2153 /* Pods-Deicer.release.xcconfig */;
+			baseConfigurationReference = 2896C10C56AA15C5A83FDDBF /* Pods-DEICER.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = DEICER/DEICER.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
-				INFOPLIST_FILE = Deicer/Info.plist;
+				INFOPLIST_FILE = DEICER/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -392,10 +399,11 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = org.name.Deicer;
-				PRODUCT_NAME = Deicer;
-				SWIFT_OBJC_BRIDGING_HEADER = "Deicer/Deicer-Bridging-Header.h";
+				PRODUCT_BUNDLE_IDENTIFIER = com.deicer.mobile;
+				PRODUCT_NAME = DEICER;
+				SWIFT_OBJC_BRIDGING_HEADER = "DEICER/DEICER-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -527,7 +535,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Deicer" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "DEICER" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
@@ -536,7 +544,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Deicer" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "DEICER" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,

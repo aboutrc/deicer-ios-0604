@@ -321,7 +321,7 @@ const MapDebug: React.FC = () => {
     
     try {
       const { data, error } = await supabase
-        .from('markers')
+        .from('pin-markers')
         .insert([
           {
             latitude: pendingMarker.lat,

@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/types/supabase';
+import { getMarkerImageUrl } from '@/lib/supabase';
 
 type Marker = Database['public']['Tables']['markers']['Row'];
 
@@ -30,7 +31,7 @@ interface MarkerContextType {
   error: string | null;
 }
 
-const MarkerContext = createContext<MarkerContextType | undefined>(undefined);
+export const MarkerContext = createContext<MarkerContextType | undefined>(undefined);
 
 export const useMarkers = () => {
   const context = useContext(MarkerContext);
@@ -40,11 +41,7 @@ export const useMarkers = () => {
   return context;
 };
 
-interface MarkerProviderProps {
-  children: ReactNode;
-}
-
-export const MarkerProvider = ({ children }: MarkerProviderProps) => {
+export const MarkerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [isAddingMarker, setIsAddingMarker] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -97,7 +94,24 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setMarkers(data || []);
+
+      // Transform the markers to include public URLs for images
+      const markersWithPublicUrls = (data || []).map(marker => {
+        if (marker.image_url) {
+          // Check if the image_url is already a full URL
+          if (marker.image_url.startsWith('http')) {
+            return marker;
+          }
+          // Otherwise, get the public URL for the filename
+          const { data: { publicUrl } } = supabase.storage
+            .from('pin-markers-images')
+            .getPublicUrl(marker.image_url);
+          return { ...marker, image_url: publicUrl };
+        }
+        return marker;
+      });
+
+      setMarkers(markersWithPublicUrls);
     } catch (err) {
       console.error('Error fetching markers:', err);
       setError('Failed to load markers');
@@ -108,33 +122,18 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
     try {
       setIsUploading(true);
       const response = await fetch(uri);
-      const arrayBuffer = await response.arrayBuffer();
-      
-      if (!arrayBuffer || arrayBuffer.byteLength === 0) {
-        console.error('Image data is empty');
-        throw new Error('Image data is empty');
-      }
-      
-      // Get content type from response headers
-      const contentType = response.headers.get('content-type') || 'image/jpeg';
-      const ext = contentType.split('/')[1].replace('jpeg', 'jpg');
+      const blob = await response.blob();
       
       // Create a unique filename
       const timestamp = Date.now();
       const random = Math.random().toString(36).substring(2, 15);
-      const filename = `marker-${timestamp}-${random}.${ext}`;
-
-      console.log('Uploading image:', {
-        filename,
-        contentType,
-        size: arrayBuffer.byteLength
-      });
+      const filename = `marker-${timestamp}-${random}.jpg`;
 
       const { data, error } = await supabase.storage
-        .from('pin-markers')
-        .upload(filename, arrayBuffer, {
-          contentType: contentType,
-          upsert: false
+        .from('pin-markers-images')
+        .upload(filename, blob, {
+          contentType: 'image/jpeg',
+          cacheControl: '3600',
         });
 
       if (error) {
@@ -142,18 +141,17 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
         throw error;
       }
 
-      console.log('Upload successful:', data);
-
+      // Get the public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('pin-markers')
+        .from('pin-markers-images')
         .getPublicUrl(filename);
 
-      return publicUrl;
+      return filename; // Return the filename instead of the public URL
     } catch (err) {
       console.error('Image upload error:', err);
       Alert.alert(
         'Error',
-        'Failed to upload image. Please ensure the image is less than 5MB and in a supported format (JPEG, PNG, GIF, HEIC/HEIF).'
+        'Failed to upload image. Please try again.'
       );
       return null;
     } finally {
@@ -175,11 +173,6 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
     try {
       setLoading(true);
       
-      let imageUrl = null;
-      if (imageUri) {
-        imageUrl = await uploadImage(imageUri);
-      }
-      
       const { data, error } = await supabase
         .from('markers')
         .insert([{
@@ -188,18 +181,27 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
           category,
           latitude,
           longitude,
-          image_url: imageUrl
+          image_url: imageUri
         }])
         .select()
         .single();
 
       if (error) throw error;
 
+      // Add the new marker to the local state
+      if (data) {
+        const newMarker: Marker = {
+          ...data,
+          image_url: imageUri ? getMarkerImageUrl(imageUri) : null
+        };
+        setMarkers(prev => [...prev, newMarker]);
+      }
+
+      // Refresh markers to ensure we have the latest data
       await fetchMarkers();
-      Alert.alert('Success', `${category.toUpperCase()} marker added successfully`);
     } catch (err) {
       console.error('Error adding marker:', err);
-      Alert.alert('Error', 'Failed to add marker');
+      throw err; // Re-throw the error to be handled by the caller
     } finally {
       setLoading(false);
       setIsAddingMarker(false);
@@ -259,5 +261,3 @@ export const MarkerProvider = ({ children }: MarkerProviderProps) => {
     </MarkerContext.Provider>
   );
 };
-
-export { MarkerProvider }

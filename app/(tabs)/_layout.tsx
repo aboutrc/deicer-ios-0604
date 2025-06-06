@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useColorScheme } from 'react-native';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { Map as MapIcon, CreditCard, Shield, Info, MessageSquare } from 'lucide-react-native';
 import { SplashScreen } from 'expo-router';
@@ -11,6 +11,7 @@ import PersistentFooter from '@/components/PersistentFooter';
 SplashScreen.preventAutoHideAsync();
 
 export default function TabLayout() {
+  const colorScheme = useColorScheme();
   const [fontsLoaded, fontError] = useFonts({
     'Inter-Regular': Inter_400Regular,
     'Inter-Medium': Inter_500Medium,
@@ -19,6 +20,7 @@ export default function TabLayout() {
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
+      // Hide splash screen once fonts are loaded or if there's an error
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
@@ -28,7 +30,7 @@ export default function TabLayout() {
   }
 
   return (
-    <View style={styles.mainContainer}>
+    <View style={[styles.mainContainer, { backgroundColor: colorScheme === 'dark' ? '#000000' : '#FFFFFF' }]}>
       <PersistentHeader />
       <Tabs
         screenOptions={{
@@ -92,10 +94,8 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
   },
   mainContainer: {
     flex: 1,
-    backgroundColor: '#000000',
   },
 });

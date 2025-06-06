@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     
     // First, get the markers that will be deleted
     const { data: markersToDelete, error: fetchError } = await supabase
-      .from('markers')
+      .from('pin-markers')
       .select('id, category, created_at, latitude, longitude')
       .limit(deleteLimit);
     
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
       const markerIds = markersToDelete.map(marker => marker.id);
       
       const { error: deleteError } = await supabase
-        .from('markers')
+        .from('pin-markers')
         .delete()
         .in('id', markerIds);
       

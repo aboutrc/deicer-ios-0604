@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "Deicer.app"
-               BlueprintName = "Deicer"
-               ReferencedContainer = "container:Deicer.xcodeproj">
+               BuildableName = "DEICER.app"
+               BlueprintName = "DEICER"
+               ReferencedContainer = "container:DEICER.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "DeicerTests.xctest"
-               BlueprintName = "DeicerTests"
-               ReferencedContainer = "container:Deicer.xcodeproj">
+               BuildableName = "DEICERTests.xctest"
+               BlueprintName = "DEICERTests"
+               ReferencedContainer = "container:DEICER.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Deicer.app"
-            BlueprintName = "Deicer"
-            ReferencedContainer = "container:Deicer.xcodeproj">
+            BuildableName = "DEICER.app"
+            BlueprintName = "DEICER"
+            ReferencedContainer = "container:DEICER.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Deicer.app"
-            BlueprintName = "Deicer"
-            ReferencedContainer = "container:Deicer.xcodeproj">
+            BuildableName = "DEICER.app"
+            BlueprintName = "DEICER"
+            ReferencedContainer = "container:DEICER.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
