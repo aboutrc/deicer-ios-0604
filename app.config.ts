@@ -4,7 +4,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'DEICER',
   slug: 'DEICER',
-  version: '1.0.0',
+  owner: 'aboutrc',
+  projectId: '8ecf7377-dbee-41ab-9c37-1db33536cdb1',
+  version: '1.0.1',
   orientation: 'portrait',
   icon: './assets/images/icons/icon.png',
   userInterfaceStyle: 'automatic',
@@ -55,13 +57,21 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ]
   ],
   extra: {
-    eas: {
-      projectId: "be205279-baa0-431e-8c0b-8af518b6ebee"
-    }
+    ...config.extra,
+    router: {},
+    googleTranslateApiKey: process.env.EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY,
+    openaiApiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY
   },
   scheme: "DEICER",
   web: {
     bundler: "metro",
     favicon: './assets/images/favicon.png'
+  },
+  updates: {
+    url: "https://u.expo.dev/8ecf7377-dbee-41ab-9c37-1db33536cdb1",
+    fallbackToCacheTimeout: 0
+  },
+  runtimeVersion: {
+    policy: "sdkVersion"
   }
 });

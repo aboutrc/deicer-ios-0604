@@ -1,7 +1,7 @@
 {
   "cli": {
     "version": ">= 5.9.1",
-    "appVersionSource": "remote"
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
@@ -9,20 +9,15 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal",
-      "ios": {
-        "simulator": true
-      }
+      "distribution": "internal"
     },
-    "production": {}
-  },
-  "submit": {
     "production": {
       "ios": {
-        "appleId": "rc@aboutrc.com",
-        "ascAppId": "6746812725",
-        "appleTeamId": "P96435L9AX"
+        "resourceClass": "m-medium"
       }
     }
+  },
+  "submit": {
+    "production": {}
   }
 } 

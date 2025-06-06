@@ -3,8 +3,8 @@
     "name": "DEICER",
     "slug": "DEICER",
     "owner": "aboutrc",
-    "projectId": "be205279-baa0-431e-8c0b-8af518b6ebee",
-    "version": "1.0.0",
+    "projectId": "8ecf7377-dbee-41ab-9c37-1db33536cdb1",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icons/icon.png",
     "scheme": "DEICER",
@@ -17,17 +17,23 @@
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.deicer.mobile",
       "icon": "./assets/images/icons/ios-light.png",
       "infoPlist": {
-        "UIBackgroundModes": ["location", "fetch"],
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ],
         "NSLocationAlwaysAndWhenInUseUsageDescription": "DEICER needs your location to notify you about nearby activity and allow you to report incidents in your area. Your location data is never stored or shared.",
         "NSLocationWhenInUseUsageDescription": "DEICER uses your location to show nearby activity on the map and allow you to report incidents. Your location is only used while the app is open.",
         "NSLocationUsageDescription": "DEICER uses your location to provide real-time information about nearby activity. Your privacy is protected as we never store or share your location data."
-      }
+      },
+      "buildNumber": "1"
     },
     "android": {
       "package": "com.deicer.mobile",
@@ -57,6 +63,7 @@
       "typedRoutes": true
     },
     "updates": {
+      "url": "https://u.expo.dev/8ecf7377-dbee-41ab-9c37-1db33536cdb1",
       "fallbackToCacheTimeout": 0
     },
     "extra": {
@@ -64,7 +71,7 @@
       "googleTranslateApiKey": "EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY",
       "openaiApiKey": "EXPO_PUBLIC_OPENAI_API_KEY",
       "eas": {
-        "projectId": "be205279-baa0-431e-8c0b-8af518b6ebee"
+        "projectId": "8ecf7377-dbee-41ab-9c37-1db33536cdb1"
       }
     },
     "web": {
@@ -74,6 +81,9 @@
     "cli": {
       "version": ">= 5.9.1",
       "appVersionSource": "remote"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }
