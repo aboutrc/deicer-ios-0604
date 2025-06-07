@@ -3,11 +3,9 @@
     "name": "DEICER",
     "slug": "DEICER",
     "owner": "aboutrc",
-    "projectId": "8ecf7377-dbee-41ab-9c37-1db33536cdb1",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icons/icon.png",
-    "scheme": "DEICER",
     "userInterfaceStyle": "automatic",
     "developmentClient": {
       "silentLaunch": false
@@ -62,25 +60,11 @@
     "experiments": {
       "typedRoutes": true
     },
-    "updates": {
-      "url": "https://u.expo.dev/8ecf7377-dbee-41ab-9c37-1db33536cdb1",
-      "fallbackToCacheTimeout": 0
-    },
     "extra": {
       "router": {},
-      "googleTranslateApiKey": "EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY",
-      "openaiApiKey": "EXPO_PUBLIC_OPENAI_API_KEY",
       "eas": {
         "projectId": "8ecf7377-dbee-41ab-9c37-1db33536cdb1"
       }
-    },
-    "web": {
-      "bundler": "metro",
-      "favicon": "./assets/images/favicon.png"
-    },
-    "cli": {
-      "version": ">= 5.9.1",
-      "appVersionSource": "remote"
     },
     "runtimeVersion": {
       "policy": "sdkVersion"

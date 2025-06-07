@@ -63,10 +63,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     openaiApiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY
   },
   scheme: "DEICER",
-  web: {
-    bundler: "metro",
-    favicon: './assets/images/favicon.png'
-  },
   updates: {
     url: "https://u.expo.dev/8ecf7377-dbee-41ab-9c37-1db33536cdb1",
     fallbackToCacheTimeout: 0
